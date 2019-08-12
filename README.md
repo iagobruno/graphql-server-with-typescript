@@ -30,8 +30,8 @@ yarn run start
 
 ## To do
 
-- [ ] Install [Apollo](https://github.com/apollographql/apollo-server/tree/master/packages/apollo-server).
-- [ ] Install [graphql-codegen](https://github.com/dotansimha/graphql-code-generator).
+- [x] Install [Apollo](https://github.com/apollographql/apollo-server/tree/master/packages/apollo-server).
+- [x] Install [graphql-codegen](https://github.com/dotansimha/graphql-code-generator).
 - [ ] Create revolvers for users.
 - [ ] Create resolvers for tweets.
 - [ ] Create subscription to listen new tweets.

@@ -1,0 +1,12 @@
+schema: ./src/schema.graphql
+generates:
+  ./src/resolvers-types.ts:
+    overwrite: true
+    plugins:
+      - typescript
+      - typescript-resolvers
+    config:
+      # See https://graphql-code-generator.com/docs/plugins/typescript#configuration
+      typesPrefix: GraphQL
+      skipTypename: true
+      avoidOptionals: true
