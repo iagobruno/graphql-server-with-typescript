@@ -12,7 +12,7 @@ Currently, in 2019, to create a GraphQL API it's necessary to write a schema wit
 
 Some time ago, I [tried to create a server](https://github.com/httpiago/graphql-and-typescript) using a package called "[type-graphql](https://github.com/19majkel94/type-graphql)" which aims to automate the creation of the schema based on code writed using [decorators](https://www.typescriptlang.org/docs/handbook/decorators.html). I reached my goal and I was pleased with the result but now, looking the code, I found some problems: decorators are not a standard yet, the code gets more verbose and difficult for other developers to maintain and the package in question still needs to be improved.
 
-Anyway, with this project I want to try another approach: automate the creation of types based on schema and this time I will use another package called "[graphql-codegen](https://github.com/dotansimha/graphql-code-generator)".
+Anyway, with this project I want to try another approach: automate the creation of code typings based on schema and this time I will use another package called "[graphql-codegen](https://github.com/dotansimha/graphql-code-generator)".
 
 ## Installation
 
