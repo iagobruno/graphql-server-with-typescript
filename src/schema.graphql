@@ -1,7 +1,109 @@
+"""JavaScript date timestamp."""
+scalar Timestamp
+
+"""Default node shape."""
+interface Node {
+  """ID of the object"""
+  id: ID!
+  """Identifies the date and time when the object was created."""
+  createdAt: Timestamp!
+}
+
+"""Default connection shape."""
+interface Connection {
+  """A list of nodes."""
+  nodes: [Node!]!
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  """Identifies the total count of items in the connection."""
+  totalCount: Int!
+}
+
+"""Default "pageInfo" object shape to aid in pagination."""
+type PageInfo {
+  """The number of elements in the list"""
+  size: Int!
+  """The id of the first list item"""
+  startCursor: ID
+  """The id of the last list item"""
+  endCursor: ID
+  """Indicates if there are more pages to fetch."""
+  hasNextPage: Boolean!
+  """Indicates if there are any pages prior to the current page"""
+  hasPreviousPage: Boolean!
+}
+
+# Nodes and edges
+
+"""A user is an individual's account on server."""
+type User implements Node {
+  id: ID!
+  name: String!
+  photo: String!
+  """The HTTP url for this user"""
+  url: String!
+  createdAt: Timestamp!
+  """Get latest user tweets."""
+  tweets(
+    """Returns the first n elements from the list."""
+    first: Int = 10,
+    """Returns the elements in the list that come after the specified ID."""
+    after: ID
+  ): TweetConnection!
+}
+
+"""A tweet is ephemeral text posted by a user."""
+type Tweet implements Node {
+  id: ID!
+  authorId: ID!
+  author: User
+  """The text of tweet"""
+  content: String!
+  """The HTTP url for this tweet"""
+  url: String!
+  createdAt: Timestamp!
+}
+
+"""A list of tweets owned by the subject."""
+type TweetConnection implements Connection {
+  """A list of nodes."""
+  nodes: [Tweet!]!
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  """Identifies the total count of items in the connection."""
+  totalCount: Int!
+}
+
+# Nodes and edges
+
+"""New tweet infos."""
+input CreateTweetInput {
+  authorId: String!
+  content: String!
+}
+
 type Query {
-  hello: String!
+  """Get latest tweets."""
+  tweets(
+    """Returns the first n elements from the list."""
+    first: Int = 10,
+    """Returns the elements in the list that come after the specified ID."""
+    after: ID,
+    """Filter tweets by user"""
+    ofUser: ID,
+  ): TweetConnection!
+  """Get a specific tweet by id."""
+  tweet(id: ID!): Tweet
+}
+
+type Mutation {
+  """Create a new tweet."""
+  createTweet(input: CreateTweetInput!): Tweet!
+  """Delete a specific tweet by id."""
+  deleteTweet(id: ID!): String!
 }
 
 schema {
   query: Query
+  mutation: Mutation
 }
