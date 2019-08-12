@@ -39,6 +39,6 @@ yarn run start
   - [ ] Create an authentication system.
   - [ ] Limit query complexity.
   - [ ] Limit query depth.
-- [ ] Make server publicly available with Heroku.
+- [ ] Make server publicly available with [Now](https://zeit.co/now).
 - [ ] Write some tests just to see.
   - Use [Jest](https://github.com/facebook/jest) with [GitHub Actions](https://github.com/features/actions) 🤩.

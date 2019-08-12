@@ -9,4 +9,3 @@ generates:
       # See https://graphql-code-generator.com/docs/plugins/typescript#configuration
       typesPrefix: GraphQL
       skipTypename: true
-      avoidOptionals: true

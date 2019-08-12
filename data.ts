@@ -1,7 +1,5 @@
 /**
  * Fake database
  */
-export default {
-  users: [],
-  tweets: [],
-}
+export const users = []
+export const tweets = []

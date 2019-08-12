@@ -5,7 +5,7 @@
   "author": "Iago Bruno <httpiago@gmail.com>",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "concurrently \"yarn run generate-ts-typings --watch\" \"ts-node-dev src/index.ts\"",
+    "dev": "nodemon --watch src --exec \"yarn run start\"",
     "start": "ts-node src/index.ts",
     "prestart": "yarn run generate-ts-typings",
     "generate-ts-typings": "graphql-codegen"
@@ -16,14 +16,13 @@
     "@graphql-codegen/typescript-resolvers": "^1.5.0",
     "apollo-server": "^2.8.1",
     "colors": "^1.3.3",
-    "concurrently": "^4.1.1",
     "graphql": "^14.4.2",
     "graphql-import-node": "^0.0.4",
     "ts-node": "^8.3.0",
-    "ts-node-dev": "^1.0.0-pre.40",
     "typescript": "^3.5.3"
   },
   "devDependencies": {
-    "@types/graphql": "^14.2.3"
+    "@types/graphql": "^14.2.3",
+    "nodemon": "^1.19.1"
   }
 }
