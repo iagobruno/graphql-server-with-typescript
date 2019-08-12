@@ -40,3 +40,5 @@ yarn run start
   - [ ] Limit query complexity.
   - [ ] Limit query depth.
 - [ ] Make server publicly available with Heroku.
+- [ ] Write some tests just to see.
+  - Use [Jest](https://github.com/facebook/jest) with [GitHub Actions](https://github.com/features/actions) 🤩.
