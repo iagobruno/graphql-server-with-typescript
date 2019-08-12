@@ -6,7 +6,8 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "concurrently \"yarn run generate-ts-typings --watch\" \"ts-node-dev src/index.ts\"",
-    "start": "yarn run generate-ts-typings && yarn run ts-node src/index.ts",
+    "start": "ts-node src/index.ts",
+    "prestart": "yarn run generate-ts-typings",
     "generate-ts-typings": "graphql-codegen"
   },
   "dependencies": {
