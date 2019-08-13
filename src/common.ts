@@ -3,7 +3,7 @@ import { Request } from 'express'
 import * as jwt from 'jwt-simple'
 import { isJWT } from 'validator'
 import { addHours, getTime, differenceInHours } from 'date-fns'
-import { GraphQLPageInfo, GraphQLNode } from './resolvers-types'
+import { GraphQLPageInfo, GraphQLNode, GraphQLMutationResponse } from './resolvers-types'
 import { ScopesArray } from './permissions'
 import { users } from '../data'
 
@@ -138,4 +138,16 @@ export function generatePaginatedConnection<NodeType extends GraphQLNode>({ allN
     pageInfo,
     totalCount: allNodes.length
   };
+}
+
+interface ResponseShape extends GraphQLMutationResponse {
+  success: boolean,
+  message: string,
+  node?: any,
+}
+/**
+ * Force resolver to return a response with a default format to the client.
+ */
+export function defaultResponseShape<R extends ResponseShape>(response: R): R {
+  return response;
 }

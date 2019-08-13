@@ -1,5 +1,5 @@
 import { GraphQLResolvers, GraphQLTweet, GraphQLUser, GraphQLUserRole } from './resolvers-types'
-import { Context, createJWT, generatePaginatedConnection } from './common'
+import { Context, createJWT, defaultResponseShape, generatePaginatedConnection } from './common'
 import { checkIsAuthenticated, checkJWTScopes, checkIfLoggedUserIsTheOwner } from './permissions'
 import * as data from '../data'
 let { users, tweets } = data
@@ -63,8 +63,8 @@ const resolvers: GraphQLResolvers<Context> = {
 
   },
   Mutation: {
-    async auth(_, { input }) {
-      const username = input.username.toLowerCase()
+    async auth(_, args) {
+      const username = args.username.toLowerCase()
       let user = users.find(user => user.username === username)
 
       // Create a new user if not found
@@ -95,21 +95,27 @@ const resolvers: GraphQLResolvers<Context> = {
       const updatedInfos = Object.assign(oldInfos, {
         username: input.username.toLowerCase()
       })
-
+      // Update user
       users.splice(userIndex, 1, updatedInfos)
-      return updatedInfos as GraphQLUser;
+
+      return defaultResponseShape({
+        success: true,
+        message: 'User updated successfully!',
+        node: updatedInfos as GraphQLUser
+      });
     },
     async deleteMe(_, {}, context) {
       await checkIsAuthenticated(context)
       await checkJWTScopes(context, ['users:deleteme'])
 
       const userIndex = users.findIndex(user => user.id === context.user.id)
-      if (userIndex === -1) {
-        return 'User not found';
-      }
-
+      // Delete user
       users.splice(userIndex, 1)
-      return 'Deleted!';
+
+      return defaultResponseShape({
+        success: true,
+        message: 'User deleted successfully!',
+      });
     },
 
     async createTweet(_, { input }, context) {
@@ -122,9 +128,14 @@ const resolvers: GraphQLResolvers<Context> = {
         authorId: context.user!.id,
         createdAt: Date.now(),
       }
-
+      // Create tweet
       tweets.push(newTweet)
-      return newTweet as any;
+
+      return defaultResponseShape({
+        success: true,
+        message: 'Successfully created tweet!',
+        node: newTweet as GraphQLTweet,
+      });
     },
     async deleteTweet(_, { id }, context) {
       await checkIsAuthenticated(context)
@@ -132,13 +143,19 @@ const resolvers: GraphQLResolvers<Context> = {
 
       const tweetIndex = tweets.findIndex(tweet => tweet.id === id)
       if (tweetIndex === -1) {
-        return 'Tweet not found';
+        return defaultResponseShape({
+          success: false,
+          message: 'Tweet not found',
+        });
       }
-
       await checkIfLoggedUserIsTheOwner(context, tweets[tweetIndex].authorId)
-
+      // Delete tweet
       tweets.splice(tweetIndex, 1)
-      return 'Deleted!';
+
+      return defaultResponseShape({
+        success: true,
+        message: 'Successfully deleted tweet!',
+      });
     }
   },
   Tweet: {

@@ -19,6 +19,13 @@ interface Connection {
   totalCount: Int!
 }
 
+"Default mutation response shape."
+interface MutationResponse {
+  success: Boolean!
+  "message to show for the user."
+  message: String!
+}
+
 """Default "pageInfo" object shape to aid in pagination."""
 type PageInfo {
   """The number of elements in the list"""
@@ -89,11 +96,6 @@ input CreateTweetInput {
   content: String!
 }
 
-input AuthInput {
-  """The name of the user."""
-  username: String!
-}
-
 input UpdateMeInput {
   """The new name of the user"""
   username: String
@@ -126,23 +128,45 @@ type Query {
   tweet(id: ID!): Tweet
 }
 
+type CreateTweetResponse implements MutationResponse {
+  success: Boolean!
+  message: String!
+  node: Tweet!
+}
+
+type UpdateMeResponse implements MutationResponse {
+  success: Boolean!
+  message: String!
+  node: User
+}
+
+type DeleteMeResponse implements MutationResponse {
+  success: Boolean!
+  message: String!
+}
+
+type DeleteTweetResponse implements MutationResponse {
+  success: Boolean!
+  message: String!
+}
+
 type Mutation {
-  """Create a new token for the user.
-  It Creates a new user if no user with this name is found."""
+  """Create a new token for the user. It Creates a new user if no user with this name is found."""
   auth(
-    input: AuthInput!
+    """The name of the user."""
+    username: String!
   ): JWTToken!
   """Update the infos of currently authenticated user."""
   updateMe(
     input: UpdateMeInput!
-  ): User
+  ): UpdateMeResponse
   """Delete the currently authenticated user."""
-  deleteMe: String
+  deleteMe: DeleteMeResponse!
 
   """Create a new tweet."""
-  createTweet(input: CreateTweetInput!): Tweet!
+  createTweet(input: CreateTweetInput!): CreateTweetResponse!
   """Delete a specific tweet by id."""
-  deleteTweet(id: ID!): String
+  deleteTweet(id: ID!): DeleteTweetResponse!
 }
 
 schema {
