@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "public": true,
+  "name": "graphql-server-with-typescript",
+  "alias": ["graphql-server-with-typescript"],
+  "builds": [
+    { "src": "./src/**/*.ts", "use": "@now/node@canary" }
+  ],
+  "routes": [
+    { "src": "/graphql", "dest": "src/index.ts" }
+  ]
+}

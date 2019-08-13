@@ -12,7 +12,7 @@ const resolvers: GraphQLResolvers<Context> = {
     photo: (user) => `https://fake-twitter.com/photo/user-${user.id}.jpg`,
     tweets: (user, args, context, infos) => (
       // @ts-ignore Call the tweets resolver with user filter
-      tweetsResolvers.Query.tweets({}, { ...args, ofUser: user.id }, context, infos)
+      resolvers.Query.tweets({}, { ...args, ofUser: user.id }, context, infos)
     ),
     numberOfTweets: (user) => tweets.filter(tweet => tweet.authorId === user.id).length,
   },

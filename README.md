@@ -2,7 +2,7 @@
 
 A simple [GraphQL](https://graphql.org) server using [NodeJS](https://nodejs.org) and [TypeScript](https://www.typescriptlang.org).
 
-<!-- [![Online playground](https://img.shields.io/badge/Online-Playground-E00097.svg)]() -->
+[![Online playground](https://img.shields.io/badge/Online-Playground-E00097.svg)](https://graphql-server-with-typescript.httpiago.now.sh/graphql)
 
 ## About
 
@@ -39,7 +39,7 @@ yarn run start
   - [x] Create an authentication system.
   - [x] Limit query complexity.
   - [x] Limit query depth.
-- [ ] Make server publicly available with [Now](https://zeit.co/now).
+- [x] Make server publicly available with [Now](https://zeit.co/now).
 - [ ] Improve documentation here in README.
   - List used packages.
   - List the cli commands.
