@@ -1,5 +1,9 @@
 import { ApolloServer, makeExecutableSchema, AuthenticationError } from 'apollo-server'
+import { Request, Response } from 'express'
 import { green } from 'colors'
+import * as queryDepthLimit from 'graphql-depth-limit'
+import queryComplexityLimit from 'graphql-cost-analysis'
+import { GraphQLError } from 'graphql'
 import 'graphql-import-node/register'
 import { Context, verifyJWT, findUserById } from './common'
 
@@ -13,8 +17,35 @@ const schema = makeExecutableSchema({
   }
 })
 
-const port = process.env.PORT || 4000
-const server = new ApolloServer({
+/**
+ * Hack to make graphql-query-complexity work with Apollo Server v2
+ * Stolen from https://github.com/withspectrum/spectrum/blob/caa361a402592c5455b99c575702b3d7cf3ab5b5/api/apollo-server.js#L21
+ */
+class ProtectedApolloServer extends ApolloServer {
+  async createGraphQLServerOptions(req: Request, res: Response) {
+    const options = await super.createGraphQLServerOptions(req, res)
+    return Object.assign(options, {
+      validationRules: [
+        // See more: https://github.com/stems/graphql-depth-limit
+        queryDepthLimit(5),
+        // See more: https://github.com/pa-bru/graphql-cost-analysis
+        queryComplexityLimit({
+          maximumCost: 50,
+          defaultCost: 0,
+          variables: req.body.variables,
+          onComplete(complexity: number) {
+            // console.log('query complexity:', complexity)
+          },
+          createError(max: number, actual: number) {
+            return new GraphQLError(`The query exceeds the maximum complexity of ${max}. Actual complexity is ${actual}`);
+          }
+        })
+      ]
+    });
+  }
+}
+
+const server = new ProtectedApolloServer({
   schema,
   playground: true,
   debug: true,
@@ -54,6 +85,7 @@ const server = new ApolloServer({
   }
 });
 
+const port = process.env.PORT || 4000
 server.listen({ port }).then(({ url }) => {
   console.log(green(`🚀  Server ready at ${url}graphql`))
 })

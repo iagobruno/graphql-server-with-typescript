@@ -37,8 +37,8 @@ yarn run start
 - [x] Create subscription to listen new tweets.
 - Security:
   - [x] Create an authentication system.
-  - [ ] Limit query complexity.
-  - [ ] Limit query depth.
+  - [x] Limit query complexity.
+  - [x] Limit query depth.
 - [ ] Make server publicly available with [Now](https://zeit.co/now).
 - [ ] Improve documentation here in README.
   - List used packages.

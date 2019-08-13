@@ -326,6 +326,17 @@ export type GraphQLResolversParentTypes = {
   Subscription: {};
 };
 
+export type GraphQLCostDirectiveResolver<
+  Result,
+  Parent,
+  ContextType = any,
+  Args = {
+    complexity?: Maybe<Scalars["Int"]>;
+    multipliers?: Maybe<Maybe<Array<Scalars["String"]>>>;
+    useMultipliers?: Maybe<Maybe<Scalars["Boolean"]>>;
+  }
+> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
 export type GraphQLConnectionResolvers<
   ContextType = any,
   ParentType extends GraphQLResolversParentTypes["Connection"] = GraphQLResolversParentTypes["Connection"]
@@ -607,4 +618,8 @@ export type GraphQLResolvers<ContextType = any> = {
   TweetConnection?: GraphQLTweetConnectionResolvers<ContextType>;
   UpdateMeResponse?: GraphQLUpdateMeResponseResolvers<ContextType>;
   User?: GraphQLUserResolvers<ContextType>;
+};
+
+export type GraphQLDirectiveResolvers<ContextType = any> = {
+  cost?: GraphQLCostDirectiveResolver<any, any, ContextType>;
 };

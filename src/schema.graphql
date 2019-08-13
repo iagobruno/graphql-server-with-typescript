@@ -1,6 +1,14 @@
 """JavaScript date timestamp."""
 scalar Timestamp
 
+directive @cost(
+  # The complexity value for the field
+  complexity: Int!,
+  # Optional multipliers
+  multipliers: [String!]
+  useMultipliers: Boolean
+) on FIELD_DEFINITION
+
 """Default node shape."""
 interface Node {
   """ID of the object"""
@@ -62,14 +70,14 @@ type User implements Node {
     first: Int = 10,
     """Returns the elements in the list that come after the specified ID."""
     after: ID
-  ): TweetConnection!
+  ): TweetConnection! @cost(complexity: 15)
 }
 
 """A tweet is ephemeral text posted by a user."""
 type Tweet implements Node {
   id: ID!
   authorId: ID!
-  author: User
+  author: User @cost(complexity: 5)
   """The text of tweet"""
   content: String!
   """The HTTP url for this tweet"""
@@ -111,9 +119,9 @@ type JWTToken {
 
 type Query {
   """The currently authenticated user."""
-  me: User
+  me: User @cost(complexity: 5)
   """Get a specific user by id."""
-  user(id: ID!): User
+  user(id: ID!): User @cost(complexity: 5)
 
   """Get latest tweets."""
   tweets(
@@ -123,9 +131,9 @@ type Query {
     after: ID,
     """Filter tweets by user"""
     ofUser: ID,
-  ): TweetConnection!
+  ): TweetConnection! @cost(complexity: 15)
   """Get a specific tweet by id."""
-  tweet(id: ID!): Tweet
+  tweet(id: ID!): Tweet @cost(complexity: 5)
 }
 
 type CreateTweetResponse implements MutationResponse {
@@ -155,25 +163,23 @@ type Mutation {
   auth(
     """The name of the user."""
     username: String!
-  ): JWTToken!
+  ): JWTToken! @cost(complexity: 30)
   """Update the infos of currently authenticated user."""
-  updateMe(
-    input: UpdateMeInput!
-  ): UpdateMeResponse
+  updateMe(input: UpdateMeInput!): UpdateMeResponse @cost(complexity: 30)
   """Delete the currently authenticated user."""
-  deleteMe: DeleteMeResponse!
+  deleteMe: DeleteMeResponse! @cost(complexity: 30)
 
   """Create a new tweet."""
-  createTweet(input: CreateTweetInput!): CreateTweetResponse!
+  createTweet(input: CreateTweetInput!): CreateTweetResponse! @cost(complexity: 5)
   """Delete a specific tweet by id."""
-  deleteTweet(id: ID!): DeleteTweetResponse!
+  deleteTweet(id: ID!): DeleteTweetResponse! @cost(complexity: 30)
 }
 
 type Subscription {
   """Listening for new tweets."""
-  tweetAdded: Tweet!
+  tweetAdded: Tweet! @cost(complexity: 30)
   """Listening for new users."""
-  userAdded: User!
+  userAdded: User! @cost(complexity: 30)
 }
 
 schema {
