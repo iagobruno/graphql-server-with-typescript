@@ -35,11 +35,17 @@ type PageInfo {
 
 # Nodes and edges
 
+enum UserRole {
+  ADMIN
+  USER
+}
+
 """A user is an individual's account on server."""
 type User implements Node {
   id: ID!
-  name: String!
+  username: String!
   photo: String!
+  role: UserRole!
   """The HTTP url for this user"""
   url: String!
   createdAt: Timestamp!
@@ -76,13 +82,37 @@ type TweetConnection implements Connection {
 
 # Nodes and edges
 
+# Inputs
+
 """New tweet infos."""
 input CreateTweetInput {
-  authorId: String!
   content: String!
 }
 
+input AuthInput {
+  """The name of the user."""
+  username: String!
+}
+
+input UpdateMeInput {
+  """The new name of the user"""
+  username: String
+}
+
+# Inputs
+
+type JWTToken {
+  """The token that you can use to authenticate in requests"""
+  token: String!
+  expiresIn: Timestamp!
+}
+
 type Query {
+  """The currently authenticated user."""
+  me: User
+  """Get a specific user by id."""
+  user(id: ID!): User
+
   """Get latest tweets."""
   tweets(
     """Returns the first n elements from the list."""
@@ -97,10 +127,22 @@ type Query {
 }
 
 type Mutation {
+  """Create a new token for the user.
+  It Creates a new user if no user with this name is found."""
+  auth(
+    input: AuthInput!
+  ): JWTToken!
+  """Update the infos of currently authenticated user."""
+  updateMe(
+    input: UpdateMeInput!
+  ): User
+  """Delete the currently authenticated user."""
+  deleteMe: String
+
   """Create a new tweet."""
   createTweet(input: CreateTweetInput!): Tweet!
   """Delete a specific tweet by id."""
-  deleteTweet(id: ID!): String!
+  deleteTweet(id: ID!): String
 }
 
 schema {

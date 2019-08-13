@@ -19,7 +19,12 @@ export type Scalars = {
   Timestamp: any;
 };
 
-/** Default connection shape */
+export type GraphQLAuthInput = {
+  /** The name of the user. */
+  username: Scalars["String"];
+};
+
+/** Default connection shape. */
 export type GraphQLConnection = {
   /** A list of nodes. */
   nodes: Array<GraphQLNode>;
@@ -31,15 +36,37 @@ export type GraphQLConnection = {
 
 /** New tweet infos. */
 export type GraphQLCreateTweetInput = {
-  authorId: Scalars["String"];
   content: Scalars["String"];
 };
 
+export type GraphQLJwtToken = {
+  /** The token that you can use to authenticate in requests */
+  token: Scalars["String"];
+  expiresIn: Scalars["Timestamp"];
+};
+
 export type GraphQLMutation = {
+  /**
+   * Create a new token for the user.
+   * It Creates a new user if no user with this name is found.
+   **/
+  auth: GraphQLJwtToken;
+  /** Update the infos of currently authenticated user. */
+  updateMe?: Maybe<GraphQLUser>;
+  /** Delete the currently authenticated user. */
+  deleteMe?: Maybe<Scalars["String"]>;
   /** Create a new tweet. */
   createTweet: GraphQLTweet;
   /** Delete a specific tweet by id. */
-  deleteTweet: Scalars["String"];
+  deleteTweet?: Maybe<Scalars["String"]>;
+};
+
+export type GraphQLMutationAuthArgs = {
+  input: GraphQLAuthInput;
+};
+
+export type GraphQLMutationUpdateMeArgs = {
+  input: GraphQLUpdateMeInput;
 };
 
 export type GraphQLMutationCreateTweetArgs = {
@@ -50,7 +77,7 @@ export type GraphQLMutationDeleteTweetArgs = {
   id: Scalars["ID"];
 };
 
-/** Default node shape */
+/** Default node shape. */
 export type GraphQLNode = {
   /** ID of the object */
   id: Scalars["ID"];
@@ -58,7 +85,7 @@ export type GraphQLNode = {
   createdAt: Scalars["Timestamp"];
 };
 
-/** Default pageInfo shape to aid in pagination. */
+/** Default "pageInfo" object shape to aid in pagination. */
 export type GraphQLPageInfo = {
   /** The number of elements in the list */
   size: Scalars["Int"];
@@ -73,10 +100,18 @@ export type GraphQLPageInfo = {
 };
 
 export type GraphQLQuery = {
+  /** The currently authenticated user. */
+  me?: Maybe<GraphQLUser>;
+  /** Get a specific user by id. */
+  user?: Maybe<GraphQLUser>;
   /** Get latest tweets. */
   tweets: GraphQLTweetConnection;
   /** Get a specific tweet by id. */
   tweet?: Maybe<GraphQLTweet>;
+};
+
+export type GraphQLQueryUserArgs = {
+  id: Scalars["ID"];
 };
 
 export type GraphQLQueryTweetsArgs = {
@@ -111,23 +146,34 @@ export type GraphQLTweetConnection = GraphQLConnection & {
   totalCount: Scalars["Int"];
 };
 
-/** A user is an individual's account on server */
+export type GraphQLUpdateMeInput = {
+  /** The new name of the user */
+  username?: Maybe<Scalars["String"]>;
+};
+
+/** A user is an individual's account on server. */
 export type GraphQLUser = GraphQLNode & {
   id: Scalars["ID"];
-  name: Scalars["String"];
+  username: Scalars["String"];
   photo: Scalars["String"];
-  /** Get latest user tweets. */
-  tweets: GraphQLTweetConnection;
+  role: GraphQLUserRole;
   /** The HTTP url for this user */
   url: Scalars["String"];
   createdAt: Scalars["Timestamp"];
+  /** Get latest user tweets. */
+  tweets: GraphQLTweetConnection;
 };
 
-/** A user is an individual's account on server */
+/** A user is an individual's account on server. */
 export type GraphQLUserTweetsArgs = {
   first?: Maybe<Scalars["Int"]>;
   after?: Maybe<Scalars["ID"]>;
 };
+
+export enum GraphQLUserRole {
+  Admin = "ADMIN",
+  User = "USER"
+}
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
 
@@ -201,36 +247,44 @@ export type DirectiveResolverFn<
 /** Mapping between all available schema types and the resolvers types */
 export type GraphQLResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
-  Int: ResolverTypeWrapper<Scalars["Int"]>;
+  User: ResolverTypeWrapper<GraphQLUser>;
+  Node: ResolverTypeWrapper<GraphQLNode>;
   ID: ResolverTypeWrapper<Scalars["ID"]>;
+  Timestamp: ResolverTypeWrapper<Scalars["Timestamp"]>;
+  String: ResolverTypeWrapper<Scalars["String"]>;
+  UserRole: GraphQLUserRole;
+  Int: ResolverTypeWrapper<Scalars["Int"]>;
   TweetConnection: ResolverTypeWrapper<GraphQLTweetConnection>;
   Connection: ResolverTypeWrapper<GraphQLConnection>;
-  Node: ResolverTypeWrapper<GraphQLNode>;
-  Timestamp: ResolverTypeWrapper<Scalars["Timestamp"]>;
   PageInfo: ResolverTypeWrapper<GraphQLPageInfo>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   Tweet: ResolverTypeWrapper<GraphQLTweet>;
-  User: ResolverTypeWrapper<GraphQLUser>;
-  String: ResolverTypeWrapper<Scalars["String"]>;
   Mutation: ResolverTypeWrapper<{}>;
+  AuthInput: GraphQLAuthInput;
+  JWTToken: ResolverTypeWrapper<GraphQLJwtToken>;
+  UpdateMeInput: GraphQLUpdateMeInput;
   CreateTweetInput: GraphQLCreateTweetInput;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type GraphQLResolversParentTypes = {
   Query: {};
-  Int: Scalars["Int"];
+  User: GraphQLUser;
+  Node: GraphQLNode;
   ID: Scalars["ID"];
+  Timestamp: Scalars["Timestamp"];
+  String: Scalars["String"];
+  UserRole: GraphQLUserRole;
+  Int: Scalars["Int"];
   TweetConnection: GraphQLTweetConnection;
   Connection: GraphQLConnection;
-  Node: GraphQLNode;
-  Timestamp: Scalars["Timestamp"];
   PageInfo: GraphQLPageInfo;
   Boolean: Scalars["Boolean"];
   Tweet: GraphQLTweet;
-  User: GraphQLUser;
-  String: Scalars["String"];
   Mutation: {};
+  AuthInput: GraphQLAuthInput;
+  JWTToken: GraphQLJwtToken;
+  UpdateMeInput: GraphQLUpdateMeInput;
   CreateTweetInput: GraphQLCreateTweetInput;
 };
 
@@ -252,10 +306,39 @@ export type GraphQLConnectionResolvers<
   totalCount?: Resolver<GraphQLResolversTypes["Int"], ParentType, ContextType>;
 };
 
+export type GraphQLJwtTokenResolvers<
+  ContextType = any,
+  ParentType extends GraphQLResolversParentTypes["JWTToken"] = GraphQLResolversParentTypes["JWTToken"]
+> = {
+  token?: Resolver<GraphQLResolversTypes["String"], ParentType, ContextType>;
+  expiresIn?: Resolver<
+    GraphQLResolversTypes["Timestamp"],
+    ParentType,
+    ContextType
+  >;
+};
+
 export type GraphQLMutationResolvers<
   ContextType = any,
   ParentType extends GraphQLResolversParentTypes["Mutation"] = GraphQLResolversParentTypes["Mutation"]
 > = {
+  auth?: Resolver<
+    GraphQLResolversTypes["JWTToken"],
+    ParentType,
+    ContextType,
+    GraphQLMutationAuthArgs
+  >;
+  updateMe?: Resolver<
+    Maybe<GraphQLResolversTypes["User"]>,
+    ParentType,
+    ContextType,
+    GraphQLMutationUpdateMeArgs
+  >;
+  deleteMe?: Resolver<
+    Maybe<GraphQLResolversTypes["String"]>,
+    ParentType,
+    ContextType
+  >;
   createTweet?: Resolver<
     GraphQLResolversTypes["Tweet"],
     ParentType,
@@ -263,7 +346,7 @@ export type GraphQLMutationResolvers<
     GraphQLMutationCreateTweetArgs
   >;
   deleteTweet?: Resolver<
-    GraphQLResolversTypes["String"],
+    Maybe<GraphQLResolversTypes["String"]>,
     ParentType,
     ContextType,
     GraphQLMutationDeleteTweetArgs
@@ -274,7 +357,7 @@ export type GraphQLNodeResolvers<
   ContextType = any,
   ParentType extends GraphQLResolversParentTypes["Node"] = GraphQLResolversParentTypes["Node"]
 > = {
-  __resolveType: TypeResolveFn<"Tweet" | "User", ParentType, ContextType>;
+  __resolveType: TypeResolveFn<"User" | "Tweet", ParentType, ContextType>;
   id?: Resolver<GraphQLResolversTypes["ID"], ParentType, ContextType>;
   createdAt?: Resolver<
     GraphQLResolversTypes["Timestamp"],
@@ -314,6 +397,13 @@ export type GraphQLQueryResolvers<
   ContextType = any,
   ParentType extends GraphQLResolversParentTypes["Query"] = GraphQLResolversParentTypes["Query"]
 > = {
+  me?: Resolver<Maybe<GraphQLResolversTypes["User"]>, ParentType, ContextType>;
+  user?: Resolver<
+    Maybe<GraphQLResolversTypes["User"]>,
+    ParentType,
+    ContextType,
+    GraphQLQueryUserArgs
+  >;
   tweets?: Resolver<
     GraphQLResolversTypes["TweetConnection"],
     ParentType,
@@ -375,24 +465,26 @@ export type GraphQLUserResolvers<
   ParentType extends GraphQLResolversParentTypes["User"] = GraphQLResolversParentTypes["User"]
 > = {
   id?: Resolver<GraphQLResolversTypes["ID"], ParentType, ContextType>;
-  name?: Resolver<GraphQLResolversTypes["String"], ParentType, ContextType>;
+  username?: Resolver<GraphQLResolversTypes["String"], ParentType, ContextType>;
   photo?: Resolver<GraphQLResolversTypes["String"], ParentType, ContextType>;
-  tweets?: Resolver<
-    GraphQLResolversTypes["TweetConnection"],
-    ParentType,
-    ContextType,
-    RequireFields<GraphQLUserTweetsArgs, "first">
-  >;
+  role?: Resolver<GraphQLResolversTypes["UserRole"], ParentType, ContextType>;
   url?: Resolver<GraphQLResolversTypes["String"], ParentType, ContextType>;
   createdAt?: Resolver<
     GraphQLResolversTypes["Timestamp"],
     ParentType,
     ContextType
   >;
+  tweets?: Resolver<
+    GraphQLResolversTypes["TweetConnection"],
+    ParentType,
+    ContextType,
+    RequireFields<GraphQLUserTweetsArgs, "first">
+  >;
 };
 
 export type GraphQLResolvers<ContextType = any> = {
   Connection?: GraphQLConnectionResolvers;
+  JWTToken?: GraphQLJwtTokenResolvers<ContextType>;
   Mutation?: GraphQLMutationResolvers<ContextType>;
   Node?: GraphQLNodeResolvers;
   PageInfo?: GraphQLPageInfoResolvers<ContextType>;

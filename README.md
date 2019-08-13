@@ -32,11 +32,11 @@ yarn run start
 
 - [x] Install [Apollo](https://github.com/apollographql/apollo-server/tree/master/packages/apollo-server).
 - [x] Install [graphql-codegen](https://github.com/dotansimha/graphql-code-generator).
-- [ ] Create revolvers for users.
+- [x] Create revolvers for users.
 - [x] Create resolvers for tweets.
 - [ ] Create subscription to listen new tweets.
 - Security:
-  - [ ] Create an authentication system.
+  - [x] Create an authentication system.
   - [ ] Limit query complexity.
   - [ ] Limit query depth.
 - [ ] Make server publicly available with [Now](https://zeit.co/now).
@@ -46,6 +46,7 @@ yarn run start
   - Show with a flowchart how is the workflow using the command `yarn run dev`.
   - Explain the security mechanisms.
   - Show some sample queries.
+  - Warn that all codes are well documented and is a realistic example.
 - [ ] Try to separate resolvers and schema into modules (in different folders and files).
 - [ ] Write some tests just to see.
   - Use [Jest](https://github.com/facebook/jest) with [GitHub Actions](https://github.com/features/actions) 🤩.
