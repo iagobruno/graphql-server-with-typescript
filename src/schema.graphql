@@ -169,7 +169,15 @@ type Mutation {
   deleteTweet(id: ID!): DeleteTweetResponse!
 }
 
+type Subscription {
+  """Listening for new tweets."""
+  tweetAdded: Tweet!
+  """Listening for new users."""
+  userAdded: User!
+}
+
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }

@@ -1,18 +1,11 @@
 import { GraphQLResolvers, GraphQLTweet, GraphQLUser, GraphQLUserRole } from './resolvers-types'
-import { Context, createJWT, defaultResponseShape, generatePaginatedConnection } from './common'
-import { checkIsAuthenticated, checkJWTScopes, checkIfLoggedUserIsTheOwner } from './permissions'
+import { Context, createJWT, pubsub, APIEvents, defaultResponseShape, generatePaginatedConnection } from './common'
+import { checkIsAuthenticated, checkJWTScopes, restrictToOwner, restrictToAdmins } from './permissions'
+import { withFilter } from 'apollo-server'
 import * as data from '../data'
 let { users, tweets } = data
 
 const resolvers: GraphQLResolvers<Context> = {
-  Node: {
-    // @see https://www.apollographql.com/docs/graphql-tools/resolvers/#unions-and-interfaces
-    __resolveType(obj: any) {
-      if (obj.content) return 'Tweet';
-      else if (obj.name) return 'User';
-      else return null;
-    }
-  },
   Query: {
     async me(_, {}, context) {
       await checkIsAuthenticated(context)
@@ -60,7 +53,6 @@ const resolvers: GraphQLResolvers<Context> = {
     tweet(_, { id }) {
       return tweets.find(tweet => tweet.id === id) as GraphQLTweet
     },
-
   },
   Mutation: {
     async auth(_, args) {
@@ -76,6 +68,7 @@ const resolvers: GraphQLResolvers<Context> = {
           createdAt: Date.now(),
         }
         users.push(newUser)
+        pubsub.publish(APIEvents.USER_ADDED, { userAdded: newUser })
         user = newUser
       }
 
@@ -130,6 +123,7 @@ const resolvers: GraphQLResolvers<Context> = {
       }
       // Create tweet
       tweets.push(newTweet)
+      pubsub.publish(APIEvents.TWEET_ADDED, { tweetAdded: newTweet })
 
       return defaultResponseShape({
         success: true,
@@ -148,7 +142,7 @@ const resolvers: GraphQLResolvers<Context> = {
           message: 'Tweet not found',
         });
       }
-      await checkIfLoggedUserIsTheOwner(context, tweets[tweetIndex].authorId)
+      await restrictToOwner(context, tweets[tweetIndex].authorId)
       // Delete tweet
       tweets.splice(tweetIndex, 1)
 
@@ -157,6 +151,21 @@ const resolvers: GraphQLResolvers<Context> = {
         message: 'Successfully deleted tweet!',
       });
     }
+  },
+  Subscription: {
+    tweetAdded: {
+      subscribe: () => pubsub.asyncIterator(APIEvents.TWEET_ADDED)
+    },
+    userAdded: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator(APIEvents.USER_ADDED),
+        async (payload, variables, context) => {
+          console.log('subscription context', context)
+          await restrictToAdmins(context)
+          return true;
+        }
+      )
+    },
   },
   Tweet: {
     url: (tweet) => `https://fake-twitter.com/user/${tweet.authorId}/status/${tweet.id}`,

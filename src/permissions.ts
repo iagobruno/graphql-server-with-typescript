@@ -80,11 +80,11 @@ export async function checkIsAuthenticated(context: Context) {
  * @example
  * async resolver(_, args, context) {
  *   await checkIsAuthenticated(context)
- *   await checkIfUserIsAdmin(context)
+ *   await restrictToAdmins(context)
  *   ...
  * }
  */
-export async function checkIfUserIsAdmin(context: Context) {
+export async function restrictToAdmins(context: Context) {
   if (!('user' in context) || context.user.role !== 'ADMIN') {
     throw new ForbiddenError('You do not have permission to access this feature.');
   }
@@ -103,11 +103,11 @@ export async function checkIfUserIsAdmin(context: Context) {
  * async resolver(_, args, context) {
  *   await checkIsAuthenticated(context)
  *   const tweet = tweets.find(...)
- *   await checkIfLoggedUserIsTheOwner(context, tweet.authorId)
+ *   await restrictToOwner(context, tweet.authorId)
  *   ...
  * }
  */
-export async function checkIfLoggedUserIsTheOwner(context: Context, ownerId: string) {
+export async function restrictToOwner(context: Context, ownerId: string) {
   if (!('user' in context) || context.user.id !== ownerId) {
     throw new ForbiddenError('You do not have permission to access this feature or perform this action.');
   }

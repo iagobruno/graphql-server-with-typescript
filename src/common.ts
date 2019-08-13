@@ -1,4 +1,4 @@
-import { AuthenticationError } from 'apollo-server'
+import { PubSub, AuthenticationError } from 'apollo-server'
 import { Request } from 'express'
 import * as jwt from 'jwt-simple'
 import { isJWT } from 'validator'
@@ -13,6 +13,16 @@ import { users } from '../data'
 export interface Context {
   user?: typeof users[0],
   jwtPayload?: JWTPayload,
+}
+
+/** @see https://www.apollographql.com/docs/apollo-server/features/subscriptions/ */
+export const pubsub = new PubSub()
+/**
+ * List of events that are triggered by resolvers.
+ */
+export enum APIEvents {
+  TWEET_ADDED = 'TWEET_ADDED',
+  USER_ADDED = 'USER_ADDED',
 }
 
 /**
@@ -70,16 +80,16 @@ export async function createJWT(subject: string, issuer?: string) {
  * @throws Throws an error if a problem occurs while validating the token.
  * @returns Returns the payload of token if all goes well or returns null if no token is found.
  */
-export async function verifyJWT(req: Request, isRequired = true) {
+export async function verifyJWT(authorizationToken: string, isRequired = true) {
   // Check if there is a token in the request
-  if (!req.headers || !req.headers.authorization || req.headers.authorization.trim() === '') {
+  if (!authorizationToken || authorizationToken.trim() === '') {
     // Allow access if authentication is optional, otherwise block request
     if (isRequired === false) return null;
     else throw new AuthenticationError('Token jwt not found.');
   }
 
   // Verify if token is well formatted ("Bearer 1234.5678.91011")
-  const [scheme, token] = req.headers.authorization.split(' ')
+  const [scheme, token] = authorizationToken.split(' ')
   if (
     typeof scheme === 'undefined' ||
     scheme !== 'Bearer' ||

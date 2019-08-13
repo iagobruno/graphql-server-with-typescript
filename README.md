@@ -34,7 +34,7 @@ yarn run start
 - [x] Install [graphql-codegen](https://github.com/dotansimha/graphql-code-generator).
 - [x] Create revolvers for users.
 - [x] Create resolvers for tweets.
-- [ ] Create subscription to listen new tweets.
+- [x] Create subscription to listen new tweets.
 - Security:
   - [x] Create an authentication system.
   - [ ] Limit query complexity.

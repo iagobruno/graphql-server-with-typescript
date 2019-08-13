@@ -1,32 +1,57 @@
-import { ApolloServer, AuthenticationError } from 'apollo-server'
+import { ApolloServer, makeExecutableSchema, AuthenticationError } from 'apollo-server'
 import { green } from 'colors'
 import 'graphql-import-node/register'
 import { Context, verifyJWT, findUserById } from './common'
 
 import * as typeDefs from './schema.graphql'
 import resolvers from './resolvers'
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers,
+  resolverValidationOptions: {
+    requireResolversForResolveType: false
+  }
+})
 
 const port = process.env.PORT || 4000
 const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  async context({ req }) {
-    const context: Context = {}
+  schema,
+  playground: true,
+  debug: true,
+  async context({ req, connection }) {
+    if (connection) return connection.context;
 
-    const jwtPayload = await verifyJWT(req, false)
-    // Add information of the user that is trying to access the route if the request contains a token.
+    // Authenticate via HTTP request
+    const jwtPayload = await verifyJWT(req.headers.authorization || '', false)
     if (jwtPayload !== null) {
       const user = findUserById(jwtPayload.subject)
       if (!user) throw new AuthenticationError('User not found');
 
-      context.user = user
-      context.jwtPayload = jwtPayload
+      const context: Context = {
+        user,
+        jwtPayload
+      }
+      return context;
     }
-
-    return context
   },
-  playground: true,
-  debug: true,
+  subscriptions: {
+    // ! I didn't test this because graphql-playground does not allow to define the "connectionParams" !
+    async onConnect({ authToken }: any) {
+      // Authenticate via WebSocket
+      if (authToken) {
+        const jwtPayload = await verifyJWT(authToken, false)
+        // Add information of the user that is trying to access the route if the request contains a token.
+        if (jwtPayload !== null) {
+          const user = findUserById(jwtPayload.subject)
+          if (!user) throw new AuthenticationError('User not found');
+          return {
+            user,
+            jwtPayload,
+          };
+        }
+      }
+    }
+  }
 });
 
 server.listen({ port }).then(({ url }) => {

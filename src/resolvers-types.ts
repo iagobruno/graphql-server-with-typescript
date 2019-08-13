@@ -139,6 +139,13 @@ export type GraphQLQueryTweetArgs = {
   id: Scalars["ID"];
 };
 
+export type GraphQLSubscription = {
+  /** Listening for new tweets. */
+  tweetAdded: GraphQLTweet;
+  /** Listening for new users. */
+  userAdded: GraphQLUser;
+};
+
 /** A tweet is ephemeral text posted by a user. */
 export type GraphQLTweet = GraphQLNode & {
   id: Scalars["ID"];
@@ -289,6 +296,7 @@ export type GraphQLResolversTypes = {
   CreateTweetInput: GraphQLCreateTweetInput;
   CreateTweetResponse: ResolverTypeWrapper<GraphQLCreateTweetResponse>;
   DeleteTweetResponse: ResolverTypeWrapper<GraphQLDeleteTweetResponse>;
+  Subscription: ResolverTypeWrapper<{}>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -315,6 +323,7 @@ export type GraphQLResolversParentTypes = {
   CreateTweetInput: GraphQLCreateTweetInput;
   CreateTweetResponse: GraphQLCreateTweetResponse;
   DeleteTweetResponse: GraphQLDeleteTweetResponse;
+  Subscription: {};
 };
 
 export type GraphQLConnectionResolvers<
@@ -488,6 +497,22 @@ export type GraphQLQueryResolvers<
   >;
 };
 
+export type GraphQLSubscriptionResolvers<
+  ContextType = any,
+  ParentType extends GraphQLResolversParentTypes["Subscription"] = GraphQLResolversParentTypes["Subscription"]
+> = {
+  tweetAdded?: SubscriptionResolver<
+    GraphQLResolversTypes["Tweet"],
+    ParentType,
+    ContextType
+  >;
+  userAdded?: SubscriptionResolver<
+    GraphQLResolversTypes["User"],
+    ParentType,
+    ContextType
+  >;
+};
+
 export interface GraphQLTimestampScalarConfig
   extends GraphQLScalarTypeConfig<GraphQLResolversTypes["Timestamp"], any> {
   name: "Timestamp";
@@ -576,6 +601,7 @@ export type GraphQLResolvers<ContextType = any> = {
   Node?: GraphQLNodeResolvers;
   PageInfo?: GraphQLPageInfoResolvers<ContextType>;
   Query?: GraphQLQueryResolvers<ContextType>;
+  Subscription?: GraphQLSubscriptionResolvers<ContextType>;
   Timestamp?: GraphQLScalarType;
   Tweet?: GraphQLTweetResolvers<ContextType>;
   TweetConnection?: GraphQLTweetConnectionResolvers<ContextType>;
