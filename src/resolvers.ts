@@ -61,7 +61,7 @@ const resolvers: GraphQLResolvers<Context> = {
 
       // Create a new user if not found
       if (!user) {
-        const newUser: Omit<GraphQLUser, 'tweets' | 'url' | 'photo'> = {
+        const newUser: typeof user = {
           id: String(users.length + 1),
           username,
           role: GraphQLUserRole.User,
@@ -178,6 +178,7 @@ const resolvers: GraphQLResolvers<Context> = {
       // @ts-ignore Call the tweets resolver with user filter
       resolvers.Query.tweets({}, { ...args, ofUser: user.id }, context, infos)
     ),
+    numberOfTweets: (user) => tweets.filter(tweet => tweet.authorId === user.id).length,
   }
 }
 

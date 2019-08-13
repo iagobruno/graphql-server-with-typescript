@@ -190,6 +190,8 @@ export type GraphQLUser = GraphQLNode & {
   createdAt: Scalars["Timestamp"];
   /** Get latest user tweets. */
   tweets: GraphQLTweetConnection;
+  /** Count how many tweets belong to this user. */
+  numberOfTweets: Scalars["Int"];
 };
 
 /** A user is an individual's account on server. */
@@ -598,6 +600,11 @@ export type GraphQLUserResolvers<
     ParentType,
     ContextType,
     RequireFields<GraphQLUserTweetsArgs, "first">
+  >;
+  numberOfTweets?: Resolver<
+    GraphQLResolversTypes["Int"],
+    ParentType,
+    ContextType
   >;
 };
 

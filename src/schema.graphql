@@ -71,6 +71,8 @@ type User implements Node {
     """Returns the elements in the list that come after the specified ID."""
     after: ID
   ): TweetConnection! @cost(complexity: 15)
+  """Count how many tweets belong to this user."""
+  numberOfTweets: Int! @cost(complexity: 15)
 }
 
 """A tweet is ephemeral text posted by a user."""
