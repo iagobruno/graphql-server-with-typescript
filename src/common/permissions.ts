@@ -1,5 +1,5 @@
 import { AuthenticationError, ForbiddenError } from 'apollo-server'
-import { Context } from './common'
+import { Context } from './utils'
 
 /**
  * List of available scopes for use at the time of creating JWT tokens

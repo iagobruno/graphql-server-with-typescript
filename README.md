@@ -47,7 +47,7 @@ yarn run start
   - Explain the security mechanisms.
   - Show some sample queries.
   - Warn that all codes are well documented and is a realistic example.
-- [ ] Try to separate resolvers and schema into modules (in different folders and files).
+- [x] Try to separate resolvers and schema into modules (in different folders and files).
 - [ ] Write some tests just to see.
   - Use [Jest](https://github.com/facebook/jest) with [GitHub Actions](https://github.com/features/actions) 🤩.
 

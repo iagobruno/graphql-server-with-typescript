@@ -1,16 +1,16 @@
 import { ApolloServer, makeExecutableSchema, AuthenticationError } from 'apollo-server'
 import { Request, Response } from 'express'
 import { green } from 'colors'
+import { GraphQLError } from 'graphql'
 // @ts-ignore
 import queryDepthLimit from 'graphql-depth-limit'
 // @ts-ignore
 import queryComplexityLimit from 'graphql-cost-analysis'
-import { GraphQLError } from 'graphql'
-import 'graphql-import-node/register'
-import { Context, verifyJWT, findUserById } from './common'
-
-import * as typeDefs from './schema.graphql'
+import { Context } from './common/utils'
+import { verifyJWT, findUserById } from './common/functions'
+import typeDefs from './types'
 import resolvers from './resolvers'
+
 const schema = makeExecutableSchema({
   typeDefs,
   resolvers,

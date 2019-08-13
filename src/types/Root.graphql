@@ -1,0 +1,69 @@
+"""JavaScript date timestamp."""
+scalar Timestamp
+
+directive @cost(
+  # The complexity value for the field
+  complexity: Int!,
+  # Optional multipliers
+  multipliers: [String!]
+  useMultipliers: Boolean
+) on FIELD_DEFINITION
+
+"""Default node shape."""
+interface Node {
+  """ID of the object"""
+  id: ID!
+  """Identifies the date and time when the object was created."""
+  createdAt: Timestamp!
+}
+
+"""Default edge shape"""
+interface Edge {
+  """The item at the end of the edge."""
+  node: Node!
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+"""Default connection shape."""
+interface Connection {
+  """A list of edges."""
+  edges: [Edge!]! @cost(complexity: 10)
+  """A list of nodes."""
+  nodes: [Node!]!
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  """Identifies the total count of items in the connection."""
+  totalCount: Int!
+}
+
+"""Default mutation response shape."""
+interface MutationResponse {
+  success: Boolean!
+  """message to show for the user."""
+  message: String!
+}
+
+"""Default "pageInfo" object shape to aid in pagination."""
+type PageInfo {
+  """The number of elements in the list"""
+  size: Int!
+  """The id of the first list item"""
+  startCursor: ID
+  """The id of the last list item"""
+  endCursor: ID
+  """Indicates if there are more pages to fetch."""
+  hasNextPage: Boolean!
+  """Indicates if there are any pages prior to the current page"""
+  hasPreviousPage: Boolean!
+}
+
+type Query
+type Mutation
+type Subscription
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}

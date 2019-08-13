@@ -1,0 +1,72 @@
+"""A tweet is ephemeral text posted by a user."""
+type Tweet implements Node {
+  id: ID!
+  authorId: ID!
+  author: User @cost(complexity: 5)
+  """The text of tweet"""
+  content: String!
+  """The HTTP url for this tweet"""
+  url: String!
+  createdAt: Timestamp!
+}
+
+type TweetEdge implements Edge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  """The item at the end of the edge."""
+  node: Tweet!
+}
+
+"""A list of tweets owned by the subject."""
+type TweetConnection implements Connection {
+  """A list of edges."""
+  edges: [TweetEdge!]!
+  """A list of nodes."""
+  nodes: [Tweet!]!
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+  """Identifies the total count of items in the connection."""
+  totalCount: Int!
+}
+
+"""New tweet infos."""
+input CreateTweetInput {
+  content: String!
+}
+
+type CreateTweetResponse implements MutationResponse {
+  success: Boolean!
+  message: String!
+  node: Tweet!
+}
+
+type DeleteTweetResponse implements MutationResponse {
+  success: Boolean!
+  message: String!
+}
+
+extend type Query {
+  """Get latest tweets."""
+  tweets(
+    """Returns the first n elements from the list."""
+    first: Int = 10,
+    """Returns the elements in the list that come after the specified ID."""
+    after: ID,
+    """Filter tweets by user"""
+    ofUser: ID,
+  ): TweetConnection! @cost(complexity: 15)
+  """Get a specific tweet by id."""
+  tweet(id: ID!): Tweet @cost(complexity: 5)
+}
+
+extend type Mutation {
+  """Create a new tweet."""
+  createTweet(input: CreateTweetInput!): CreateTweetResponse! @cost(complexity: 10)
+  """Delete a specific tweet by id."""
+  deleteTweet(id: ID!): DeleteTweetResponse! @cost(complexity: 10)
+}
+
+extend type Subscription {
+  """Listening for new tweets."""
+  tweetAdded: Tweet! @cost(complexity: 50)
+}

@@ -1,28 +1,11 @@
-import { PubSub, AuthenticationError } from 'apollo-server'
-import * as jwt from 'jwt-simple'
-import { isJWT } from 'validator'
+import { AuthenticationError } from 'apollo-server'
 import { addHours, getTime, differenceInHours } from 'date-fns'
-import { GraphQLPageInfo, GraphQLNode, GraphQLMutationResponse } from './resolvers-types'
 import { ScopesArray, checkIsAuthenticated } from './permissions'
-import { users } from '../data'
-
-/**
- * The shape of context object passed to all resolvers in api.
- */
-export interface Context {
-  user?: typeof users[0],
-  jwtPayload?: JWTPayload,
-}
-
-/** @see https://www.apollographql.com/docs/apollo-server/features/subscriptions/ */
-export const pubsub = new PubSub()
-/**
- * List of events that are triggered by resolvers.
- */
-export enum APIEvents {
-  TWEET_ADDED = 'TWEET_ADDED',
-  USER_ADDED = 'USER_ADDED',
-}
+import { GraphQLPageInfo, GraphQLNode, GraphQLMutationResponse } from '../resolvers/graphql-resolvers-types'
+import jwt from 'jwt-simple'
+import { isJWT } from 'validator'
+import { Context } from './utils'
+import { users } from '../../data'
 
 /**
  * ! The jwt secret is here just to not complicate the codes. A good practice is store it in process.env.JWT_SECRET !
@@ -118,6 +101,7 @@ export async function verifyJWT(authorizationToken: string, isRequired = true) {
   return payload;
 }
 
+
 /**
  * Function to be used within resolvers to get informations of logged in user.
  * @throws Throws an error if no users are found.
@@ -153,11 +137,13 @@ type PaginatedResponseArgs<Node> = {
 export function defaultConnectionShape<NodeType extends GraphQLNode>(
   { allNodes, nodes, firstArg, startIndex }: PaginatedResponseArgs<NodeType>
 ) {
+  const firstItem = nodes[0]
+  const lastItem = nodes[nodes.length-1]
   const hasAtLeast1Item = (nodes.length >= 1)
   const pageInfo: GraphQLPageInfo = {
     size: Math.min(firstArg, nodes.length),
-    startCursor: hasAtLeast1Item ? encode(nodes[0].id) : null,
-    endCursor: hasAtLeast1Item ? encode(nodes[nodes.length-1].id) : null,
+    startCursor: hasAtLeast1Item ? encode(firstItem.id) : null,
+    endCursor: hasAtLeast1Item ? encode(lastItem.id) : null,
     hasPreviousPage: startIndex > 0,
     hasNextPage: (startIndex + firstArg) < allNodes.length,
   }

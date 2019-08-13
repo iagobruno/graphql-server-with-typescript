@@ -1,0 +1,71 @@
+enum UserRole {
+  ADMIN
+  USER
+}
+
+"""A user is an individual's account on server."""
+type User implements Node {
+  id: ID!
+  username: String!
+  photo: String!
+  role: UserRole!
+  """The HTTP url for this user"""
+  url: String!
+  createdAt: Timestamp!
+  """Get latest user tweets."""
+  tweets(
+    """Returns the first n elements from the list."""
+    first: Int = 10,
+    """Returns the elements in the list that come after the specified ID."""
+    after: ID
+  ): TweetConnection! @cost(complexity: 15)
+  """Count how many tweets belong to this user."""
+  numberOfTweets: Int! @cost(complexity: 15)
+}
+
+type JWTToken {
+  """The token that you can use to authenticate in requests"""
+  token: String!
+  expiresIn: Timestamp!
+}
+
+"""New user infos"""
+input UpdateMeInput {
+  """The new name of the user"""
+  username: String
+}
+
+type UpdateMeResponse implements MutationResponse {
+  success: Boolean!
+  message: String!
+  node: User
+}
+
+type DeleteMeResponse implements MutationResponse {
+  success: Boolean!
+  message: String!
+}
+
+extend type Query {
+  """The currently authenticated user."""
+  me: User @cost(complexity: 5)
+  """Get a specific user by id."""
+  user(id: ID!): User @cost(complexity: 5)
+}
+
+extend type Mutation {
+  """Create a new token for the user. It Creates a new user if no user with this name is found."""
+  auth(
+    """The name of the user."""
+    username: String!
+  ): JWTToken! @cost(complexity: 50)
+  """Update the infos of currently authenticated user."""
+  updateMe(input: UpdateMeInput!): UpdateMeResponse @cost(complexity: 10)
+  """Delete the currently authenticated user."""
+  deleteMe: DeleteMeResponse! @cost(complexity: 10)
+}
+
+extend type Subscription {
+  """Listening for new users."""
+  userAdded: User! @cost(complexity: 50)
+}
