@@ -1,3 +1,4 @@
+# See https://graphql-code-generator.com/docs/getting-started/codegen-config
 schema: ./src/schema.graphql
 generates:
   ./src/resolvers-types.ts:

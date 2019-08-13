@@ -4,12 +4,12 @@
     "moduleResolution": "node",
     "target": "es6",
     "lib": ["es2016"],
-    "allowJs": true,
+    "strict": true,
     "outDir": "dist",
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "noEmitOnError": true,
   },
-  "include": ["src"],
-  "files": ["globals.d.ts"],
   "exclude": ["node_modules"]
 }

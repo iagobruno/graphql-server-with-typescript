@@ -1,7 +1,9 @@
 import { ApolloServer, makeExecutableSchema, AuthenticationError } from 'apollo-server'
 import { Request, Response } from 'express'
 import { green } from 'colors'
-import * as queryDepthLimit from 'graphql-depth-limit'
+// @ts-ignore
+import queryDepthLimit from 'graphql-depth-limit'
+// @ts-ignore
 import queryComplexityLimit from 'graphql-cost-analysis'
 import { GraphQLError } from 'graphql'
 import 'graphql-import-node/register'

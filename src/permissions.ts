@@ -32,7 +32,7 @@ export type ScopesArray = Array<keyof typeof Scopes>
   * }
  */
 export async function checkJWTScopes(context: Context, scopesToCheck: ScopesArray) {
-  if (!('jwtPayload' in context)) {
+  if (typeof context.jwtPayload === 'undefined') {
     throw new ForbiddenError('No jwt token was found');
   }
   const scopesInJWT = context.jwtPayload.scopes
@@ -65,7 +65,7 @@ export async function checkJWTScopes(context: Context, scopesToCheck: ScopesArra
   * }
  */
 export async function checkIsAuthenticated(context: Context) {
-  if (!('user' in context)) {
+  if (typeof context.user === 'undefined') {
     throw new AuthenticationError('You must be logged in');
   }
 
@@ -85,7 +85,7 @@ export async function checkIsAuthenticated(context: Context) {
  * }
  */
 export async function restrictToAdmins(context: Context) {
-  if (!('user' in context) || context.user.role !== 'ADMIN') {
+  if (typeof context.user === 'undefined' || context.user.role !== 'ADMIN') {
     throw new ForbiddenError('You do not have permission to access this feature.');
   }
 
@@ -108,7 +108,7 @@ export async function restrictToAdmins(context: Context) {
  * }
  */
 export async function restrictToOwner(context: Context, ownerId: string) {
-  if (!('user' in context) || context.user.id !== ownerId) {
+  if (typeof context.user === 'undefined' || context.user.id !== ownerId) {
     throw new ForbiddenError('You do not have permission to access this feature or perform this action.');
   }
 

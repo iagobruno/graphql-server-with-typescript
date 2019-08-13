@@ -1,1 +1,3 @@
 node_modules
+src/resolvers-types.ts
+yarn-error.log

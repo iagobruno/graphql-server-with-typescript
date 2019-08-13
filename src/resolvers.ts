@@ -1,18 +1,34 @@
 import { GraphQLResolvers, GraphQLTweet, GraphQLUser, GraphQLUserRole } from './resolvers-types'
-import { Context, createJWT, pubsub, APIEvents, defaultResponseShape, generatePaginatedConnection } from './common'
+import { Context, createJWT, pubsub, APIEvents, getLoggedUser, defaultResponseShape, generatePaginatedConnection } from './common'
 import { checkIsAuthenticated, checkJWTScopes, restrictToOwner, restrictToAdmins } from './permissions'
 import { withFilter } from 'apollo-server'
 import * as data from '../data'
 let { users, tweets } = data
 
 const resolvers: GraphQLResolvers<Context> = {
+  // Field resolvers
+  User: {
+    url: (user) => `https://fake-twitter.com/user/${user.id}`,
+    photo: (user) => `https://fake-twitter.com/photo/user-${user.id}.jpg`,
+    tweets: (user, args, context, infos) => (
+      // @ts-ignore Call the tweets resolver with user filter
+      tweetsResolvers.Query.tweets({}, { ...args, ofUser: user.id }, context, infos)
+    ),
+    numberOfTweets: (user) => tweets.filter(tweet => tweet.authorId === user.id).length,
+  },
+  Tweet: {
+    url: (tweet) => `https://fake-twitter.com/user/${tweet.authorId}/status/${tweet.id}`,
+    author: (tweet) => users.find(user => user.id === tweet.authorId) as any,
+  },
+
   Query: {
     async me(_, {}, context) {
       await checkIsAuthenticated(context)
       await checkJWTScopes(context, ['users:me'])
+      const currentUser = await getLoggedUser(context)
 
       return users.find(users => (
-        users.id === context.user.id
+        users.id === currentUser!.id
       )) as GraphQLUser;
     },
     async user(_, { id }) {
@@ -61,7 +77,7 @@ const resolvers: GraphQLResolvers<Context> = {
 
       // Create a new user if not found
       if (!user) {
-        const newUser: typeof user = {
+        const newUser: typeof users[0] = {
           id: String(users.length + 1),
           username,
           role: GraphQLUserRole.User,
@@ -82,11 +98,12 @@ const resolvers: GraphQLResolvers<Context> = {
     async updateMe(_, { input }, context) {
       await checkIsAuthenticated(context)
       await checkJWTScopes(context, ['users:updateme'])
+      const currentUser = await getLoggedUser(context)
 
-      const userIndex = users.findIndex(user => user.id === context.user.id)
+      const userIndex = users.findIndex(user => user.id === currentUser.id)
       const oldInfos = users[userIndex]
       const updatedInfos = Object.assign(oldInfos, {
-        username: input.username.toLowerCase()
+        username: input.username!.toLowerCase()
       })
       // Update user
       users.splice(userIndex, 1, updatedInfos)
@@ -100,8 +117,9 @@ const resolvers: GraphQLResolvers<Context> = {
     async deleteMe(_, {}, context) {
       await checkIsAuthenticated(context)
       await checkJWTScopes(context, ['users:deleteme'])
+      const currentUser = await getLoggedUser(context)
 
-      const userIndex = users.findIndex(user => user.id === context.user.id)
+      const userIndex = users.findIndex(user => user.id === currentUser.id)
       // Delete user
       users.splice(userIndex, 1)
 
@@ -114,11 +132,12 @@ const resolvers: GraphQLResolvers<Context> = {
     async createTweet(_, { input }, context) {
       await checkIsAuthenticated(context)
       await checkJWTScopes(context, ['tweets:create'])
+      const currentUser = await getLoggedUser(context)
 
       const newTweet: Omit<GraphQLTweet, 'url' | 'author'> = {
         id: String(tweets.length + 1),
         content: input.content,
-        authorId: context.user!.id,
+        authorId: currentUser.id,
         createdAt: Date.now(),
       }
       // Create tweet
@@ -150,7 +169,7 @@ const resolvers: GraphQLResolvers<Context> = {
         success: true,
         message: 'Successfully deleted tweet!',
       });
-    }
+    },
   },
   Subscription: {
     tweetAdded: {
@@ -167,19 +186,6 @@ const resolvers: GraphQLResolvers<Context> = {
       )
     },
   },
-  Tweet: {
-    url: (tweet) => `https://fake-twitter.com/user/${tweet.authorId}/status/${tweet.id}`,
-    author: (tweet) => users.find(user => user.id === tweet.authorId) as any,
-  },
-  User: {
-    url: (user) => `https://fake-twitter.com/user/${user.id}`,
-    photo: (user) => `https://fake-twitter.com/photo/user-${user.id}.jpg`,
-    tweets: (user, args, context, infos) => (
-      // @ts-ignore Call the tweets resolver with user filter
-      resolvers.Query.tweets({}, { ...args, ofUser: user.id }, context, infos)
-    ),
-    numberOfTweets: (user) => tweets.filter(tweet => tweet.authorId === user.id).length,
-  }
 }
 
-export default resolvers
+export default resolvers as any

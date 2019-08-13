@@ -1,10 +1,9 @@
 import { PubSub, AuthenticationError } from 'apollo-server'
-import { Request } from 'express'
 import * as jwt from 'jwt-simple'
 import { isJWT } from 'validator'
 import { addHours, getTime, differenceInHours } from 'date-fns'
 import { GraphQLPageInfo, GraphQLNode, GraphQLMutationResponse } from './resolvers-types'
-import { ScopesArray } from './permissions'
+import { ScopesArray, checkIsAuthenticated } from './permissions'
 import { users } from '../data'
 
 /**
@@ -117,6 +116,24 @@ export async function verifyJWT(authorizationToken: string, isRequired = true) {
 
   // Allow access!
   return payload;
+}
+
+/**
+ * Function to be used within resolvers to get informations of logged in user.
+ * @throws Throws an error if no users are found.
+ * @returns Returns an object with user infos.
+ *
+ * @example
+ * async resolver(_, args, context) {
+ *   await checkIsAuthenticated(context)
+ *   const currentUser = await getLoggedUser(context)
+ *   ...
+ * }
+ */
+export async function getLoggedUser(context: Context) {
+  await checkIsAuthenticated(context)
+
+  return context.user!;
 }
 
 export function findUserById(id: string) {
