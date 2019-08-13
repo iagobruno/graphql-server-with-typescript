@@ -10,6 +10,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noEmitOnError": true,
+    "typeRoots" : ["./node_modules/@types", "./globals.d.ts"]
   },
   "exclude": ["node_modules"]
 }

@@ -1,5 +1,6 @@
 import { GraphQLResolvers, GraphQLTweet, GraphQLUser, GraphQLUserRole } from './resolvers-types'
-import { Context, createJWT, pubsub, APIEvents, getLoggedUser, defaultResponseShape, generatePaginatedConnection } from './common'
+import { createJWT, pubsub, getLoggedUser, defaultResponseShape, defaultConnectionShape } from './common'
+import { Context, APIEvents, encode, decode } from './common'
 import { checkIsAuthenticated, checkJWTScopes, restrictToOwner, restrictToAdmins } from './permissions'
 import { withFilter } from 'apollo-server'
 import * as data from '../data'
@@ -20,6 +21,12 @@ const resolvers: GraphQLResolvers<Context> = {
     url: (tweet) => `https://fake-twitter.com/user/${tweet.authorId}/status/${tweet.id}`,
     author: (tweet) => users.find(user => user.id === tweet.authorId) as any,
   },
+  TweetConnection: {
+    edges: (parent) => parent.nodes.map(node => ({
+      cursor: encode(node.id),
+      node,
+    })) as any,
+  },
 
   Query: {
     async me(_, {}, context) {
@@ -38,6 +45,7 @@ const resolvers: GraphQLResolvers<Context> = {
     tweets(_, { first, after, ofUser }) {
       // Validate arguments
       first = Math.max(0, Math.min(50, first))
+      const cursor = after ? decode(after) : null
 
       let allTweets = tweets as Array<GraphQLTweet>
 
@@ -49,22 +57,22 @@ const resolvers: GraphQLResolvers<Context> = {
       // Sort by most recent
       allTweets = allTweets.sort((a, b) => b.createdAt - a.createdAt)
 
-      // If the request contains an id in "after" argument, look for the index of the item
+      // If the request contains an cursor in "after" argument, look for the index of the item
       // to indicate where the paging should start
       let startIndex = 0
-      if (after) {
-        startIndex = allTweets.findIndex(tweet => tweet.id === after) + 1
+      if (cursor) {
+        startIndex = allTweets.findIndex(tweet => tweet.id === cursor) + 1
       }
 
       // Apply pagination
       const nodes = allTweets.slice(startIndex, startIndex + first)
 
-      return generatePaginatedConnection<GraphQLTweet>({
+      return defaultConnectionShape<GraphQLTweet>({
         allNodes: allTweets,
         nodes,
         firstArg: first,
         startIndex
-      });
+      }) as any;
     },
     tweet(_, { id }) {
       return tweets.find(tweet => tweet.id === id) as GraphQLTweet

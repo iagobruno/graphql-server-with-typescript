@@ -150,12 +150,14 @@ type PaginatedResponseArgs<Node> = {
 /**
  * @returns An object with the default shape of GraphQL paginations.
  */
-export function generatePaginatedConnection<NodeType extends GraphQLNode>({ allNodes, nodes, firstArg, startIndex }: PaginatedResponseArgs<NodeType>) {
+export function defaultConnectionShape<NodeType extends GraphQLNode>(
+  { allNodes, nodes, firstArg, startIndex }: PaginatedResponseArgs<NodeType>
+) {
   const hasAtLeast1Item = (nodes.length >= 1)
   const pageInfo: GraphQLPageInfo = {
     size: Math.min(firstArg, nodes.length),
-    startCursor: hasAtLeast1Item ? nodes[0].id : null,
-    endCursor: hasAtLeast1Item ? nodes[nodes.length-1].id : null,
+    startCursor: hasAtLeast1Item ? encode(nodes[0].id) : null,
+    endCursor: hasAtLeast1Item ? encode(nodes[nodes.length-1].id) : null,
     hasPreviousPage: startIndex > 0,
     hasNextPage: (startIndex + firstArg) < allNodes.length,
   }
@@ -177,4 +179,22 @@ interface ResponseShape extends GraphQLMutationResponse {
  */
 export function defaultResponseShape<R extends ResponseShape>(response: R): R {
   return response;
+}
+
+/**
+ * Encode a string to base64 (using the Node built-in Buffer).
+ * Stolen from http://stackoverflow.com/a/38237610/2115623
+ */
+export function encode(text: string | number) {
+  return Buffer.from(String(text)).toString('base64');
+}
+
+type Base64String = string;
+
+/**
+ * Decode a base64 string (using the Node built-in Buffer).
+ * Stolen from http://stackoverflow.com/a/38237610/2115623
+ */
+export function decode(encodedText: Base64String) {
+  return Buffer.from(encodedText, 'base64').toString('ascii');
 }
