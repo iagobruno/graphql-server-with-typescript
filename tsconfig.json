@@ -10,6 +10,9 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noEmitOnError": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedParameters": false
   },
   "exclude": ["node_modules"]
 }
