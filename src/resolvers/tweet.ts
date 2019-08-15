@@ -25,7 +25,6 @@ const tweetResolvers: GraphQLResolvers = {
     tweets(_, { first, after, ofUser }) {
       // Validate arguments
       first = Math.max(0, Math.min(50, first))
-      const cursor = after ? decode(after) : null
 
       let allTweets = tweets as Array<GraphQLTweet>
 
@@ -40,7 +39,8 @@ const tweetResolvers: GraphQLResolvers = {
       // If the request contains an cursor in "after" argument, look for the index of the item
       // to indicate where the paging should start
       let startIndex = 0
-      if (cursor) {
+      if (after) {
+        const cursor = decode(after)
         startIndex = allTweets.findIndex(tweet => tweet.id === cursor) + 1
       }
 
