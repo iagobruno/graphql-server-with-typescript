@@ -76,7 +76,7 @@ Another good practice is to determine what type of user has access to a certain 
 
 ## Pagination
 
-To traverse the connections, a paging mechanism using cursors was implemented on this server. Example of how to use in queries:
+To traverse the connections, a cursor-based pagination was implemented on this server. Example:
 
 ```graphql
 query GetLatestTweets {
@@ -84,6 +84,7 @@ query GetLatestTweets {
     edges {
       cursor
       node {
+        id
         content
         createdAt
       }
@@ -91,12 +92,13 @@ query GetLatestTweets {
     pageInfos {
       endCursor
       hasNextPage
+      hasPreviousPage
     }
   }
 }
 ```
 
-[You can read more about GraphqQL cursors pagination in the Relay specification](https://facebook.github.io/relay/graphql/connections.htm).
+[You can read more about GraphQL connections here](https://blog.apollographql.com/explaining-graphql-connections-c48b7c3d6976).
 
 ## Inspirations
 
