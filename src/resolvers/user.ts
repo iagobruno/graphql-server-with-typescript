@@ -61,6 +61,24 @@ const userResolvers: GraphQLResolvers = {
       await checkIsAuthenticated(context)
       await checkJWTScopes(context, ['users:updateme'])
       const currentUser = await getLoggedUser(context)
+      
+      // Validate username
+      if (input.username) {
+        if (input.username === 'null' || input.username === 'undefined') {
+          return defaultResponseShape({
+            success: false,
+            message: 'Nice try. Invalid username input',
+          })
+        }
+
+        const usernameAlreadyTaken = users.find(user => user.username === input.username)
+        if (usernameAlreadyTaken) {
+          return defaultResponseShape({
+            success: false,
+            message: 'Username already taken! Try another',
+          });
+        }
+      }
 
       const userIndex = users.findIndex(user => user.id === currentUser.id)
       const oldInfos = users[userIndex]
