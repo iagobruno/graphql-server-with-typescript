@@ -43,7 +43,7 @@ const userResolvers: GraphQLResolvers = {
           id: String(users.length + 1),
           username,
           role: GraphQLUserRole.User,
-          createdAt: Date.now(),
+          createdAt: new Date(),
         }
         users.push(newUser)
         pubsub.publish(APIEvents.USER_ADDED, { userAdded: newUser })
@@ -53,7 +53,7 @@ const userResolvers: GraphQLResolvers = {
       const jwt = await createJWT(user.id, 'GraphQL auth')
       return {
         token: `Bearer ${jwt.token}`,
-        expiresIn: jwt.expiresIn.getTime(),
+        expiresIn: jwt.expiresIn,
       };
     },
 

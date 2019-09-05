@@ -1,9 +1,12 @@
-"""JavaScript date timestamp."""
-scalar Timestamp
+"""A cursor is an opaque ID received in a paged response."""
+scalar Cursor
+scalar DateTime
+scalar URL
+scalar PositiveInt
 
 directive @cost(
   # The complexity value for the field
-  complexity: Int!,
+  complexity: PositiveInt!,
   # Optional multipliers
   multipliers: [String!]
   useMultipliers: Boolean
@@ -14,7 +17,7 @@ interface Node {
   """ID of the object"""
   id: ID!
   """Identifies the date and time when the object was created."""
-  createdAt: Timestamp!
+  createdAt: DateTime!
 }
 
 """Default edge shape"""
@@ -22,7 +25,7 @@ interface Edge {
   """The item at the end of the edge."""
   node: Node!
   """A cursor for use in pagination."""
-  cursor: String!
+  cursor: Cursor!
 }
 
 """Default connection shape."""
@@ -49,9 +52,9 @@ type PageInfo {
   """The number of elements in the list"""
   size: Int!
   """The id of the first list item"""
-  startCursor: ID
+  startCursor: Cursor
   """The id of the last list item"""
-  endCursor: ID
+  endCursor: Cursor
   """Indicates if there are more pages to fetch."""
   hasNextPage: Boolean!
   """Indicates if there are any pages prior to the current page"""

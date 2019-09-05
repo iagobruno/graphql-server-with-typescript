@@ -100,6 +100,46 @@ query GetLatestTweets {
 
 [You can read more about GraphQL connections here](https://blog.apollographql.com/explaining-graphql-connections-c48b7c3d6976).
 
+## Custom scalars
+
+The package [graphql-scalars](https://github.com/Urigo/graphql-scalars) has been installed to provides some custom [scalars](https://graphql.org/learn/schema/#scalar-types) to make explicit what the field is about and also validate the inputs.
+
+To add a new scalar, just set it in [Root.graphql](src/types/Root.graphql):
+
+```diff
+ scalar DateTime
+ scalar URL
++scalar PositiveInt
+....
+```
+
+Register its resolver in the [resolvers/index.ts](src/resolvers/index.ts) file:
+
+```diff
+-import { DateTimeResolver, URLResolver } from 'graphql-scalars'
++import { DateTimeResolver, URLResolver, PositiveIntResolver } from 'graphql-scalars'
+
+const customScalarsResolvers = {
+   DateTime: DateTimeResolver,
+   URL: URLResolver,
+   // The key must have the same scalar name defined in the previous step.
++  PositiveInt: PositiveIntResolver,
+}
+...
+```
+
+And define its type ([valid in TypeScript](https://www.typescriptlang.org/docs/handbook/basic-types.html)) in [this configuration file](codegen.yml) so graphql-codegen can correctly create type of resolvers (if you don't do this step, the type of arguments and fields with custom scalar will be "any").
+
+```diff
+...
+    config:
+      scalars:
+        DateTime: Date
+        URL: string
++       PositiveInt: number
+...
+```
+
 ## Inspirations
 
 - [GitHub GraphQL API](https://developer.github.com/v4/)

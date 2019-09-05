@@ -9,5 +9,9 @@ generates:
     config:
       # See https://graphql-code-generator.com/docs/plugins/typescript#configuration
       typesPrefix: GraphQL
-      skipTypename: true
+      scalars:
+        DateTime: Date
+        URL: string
+        PositiveInt: number
       contextType: ../common/utils#Context
+      skipTypename: true

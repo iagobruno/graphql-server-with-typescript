@@ -7,17 +7,17 @@ enum UserRole {
 type User implements Node {
   id: ID!
   username: String!
-  photo: String!
+  photo: URL!
   role: UserRole!
   """The HTTP url for this user"""
-  url: String!
-  createdAt: Timestamp!
+  url: URL!
+  createdAt: DateTime!
   """Get latest user tweets."""
   tweets(
     """Returns the first n elements from the list."""
-    first: Int = 10,
-    """Returns the elements in the list that come after the specified ID."""
-    after: ID
+    first: PositiveInt = 10,
+    """Returns the elements in the list that come after the specified cursor."""
+    after: Cursor
   ): TweetConnection! @cost(complexity: 15)
   """Count how many tweets belong to this user."""
   numberOfTweets: Int! @cost(complexity: 15)
@@ -26,7 +26,7 @@ type User implements Node {
 type JWTToken {
   """The token that you can use to authenticate in requests"""
   token: String!
-  expiresIn: Timestamp!
+  expiresIn: DateTime!
 }
 
 """New user infos"""

@@ -49,7 +49,9 @@ class ProtectedApolloServer extends ApolloServer {
 
 const server = new ProtectedApolloServer({
   schema,
+  //! Disable these in production!
   playground: true,
+  introspection: true,
   debug: true,
   async context({ req, connection }) {
     if (connection) return connection.context;

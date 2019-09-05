@@ -33,7 +33,7 @@ const tweetResolvers: GraphQLResolvers = {
         allTweets = allTweets.filter(tweet => tweet.authorId == ofUser)
       }
 
-      // Sort by most recent
+      // @ts-ignore Sort by most recent
       allTweets = allTweets.sort((a, b) => b.createdAt - a.createdAt)
 
       // If the request contains an cursor in "after" argument, look for the index of the item
@@ -68,7 +68,7 @@ const tweetResolvers: GraphQLResolvers = {
         id: String(tweets.length + 1),
         content: input.content,
         authorId: currentUser.id,
-        createdAt: Date.now(),
+        createdAt: new Date(),
       }
       // Create tweet
       tweets.push(newTweet)

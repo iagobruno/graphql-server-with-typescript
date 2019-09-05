@@ -6,13 +6,13 @@ type Tweet implements Node {
   """The text of tweet"""
   content: String!
   """The HTTP url for this tweet"""
-  url: String!
-  createdAt: Timestamp!
+  url: URL!
+  createdAt: DateTime!
 }
 
 type TweetEdge implements Edge {
   """A cursor for use in pagination"""
-  cursor: String!
+  cursor: Cursor!
   """The item at the end of the edge."""
   node: Tweet!
 }
@@ -49,9 +49,9 @@ extend type Query {
   """Get latest tweets."""
   tweets(
     """Returns the first n elements from the list."""
-    first: Int = 10,
-    """Returns the elements in the list that come after the specified ID."""
-    after: ID,
+    first: PositiveInt = 10,
+    """Returns the elements in the list that come after the specified cursor."""
+    after: Cursor,
     """Filter tweets by user"""
     ofUser: ID,
   ): TweetConnection! @cost(complexity: 15)
