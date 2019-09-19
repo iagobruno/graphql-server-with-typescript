@@ -8,7 +8,7 @@ import queryDepthLimit from 'graphql-depth-limit'
 import queryComplexityLimit from 'graphql-cost-analysis'
 import { Context } from './common/utils'
 import { verifyJWT, findUserById } from './common/functions'
-import typeDefs from './types'
+import typeDefs from './schemas'
 import resolvers from './resolvers'
 
 const schema = makeExecutableSchema({

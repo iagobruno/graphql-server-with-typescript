@@ -1,7 +1,7 @@
 # See https://graphql-code-generator.com/docs/getting-started/codegen-config
 generates:
   ./src/resolvers/graphql-resolvers-types.ts:
-    schema: src/types/*.graphql
+    schema: src/schemas/*.graphql
     overwrite: true
     plugins:
       - typescript

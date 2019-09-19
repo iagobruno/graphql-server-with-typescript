@@ -38,7 +38,7 @@ Some security barriers have been implemented on this server to prevent abuse and
 
 ##### Query deep limit
 
-There is a limit to how deep a query can be and if it is greater than 5, an error is returned. [See implementation](https://github.com/httpiago/graphql-server-with-typescript/blob/4138f6ef17ded0709a89302129e3e81faa5fa59f/src/index.ts#L32).
+There is a limit to how deep a query can be and if it is greater than 5, an error is returned. [See implementation](src/index.ts#L32).
 Here's an example of how to calculate depth:
 
 ```graphql
@@ -60,19 +60,19 @@ query GetUserAndHisTweets { // 0
 
 #### Query complexity limit
 
-Some properties and mutations are more expensive than others and it's a good practice assign a complexity cost to them so the server can sum and check if queries exceeded the cost limit before they are actually executed. [See implementation](https://github.com/httpiago/graphql-server-with-typescript/blob/4138f6ef17ded0709a89302129e3e81faa5fa59f/src/index.ts#L34) and [how to define the cost](https://github.com/httpiago/graphql-server-with-typescript/blob/4138f6ef17ded0709a89302129e3e81faa5fa59f/src/types/User.graphql#L51).
+Some properties and mutations are more expensive than others and it's a good practice assign a complexity cost to them so the server can sum and check if queries exceeded the cost limit before they are actually executed. [See implementation](src/index.ts#L34) and [how to define the cost](src/schemas/User.graphql#L51).
 
 #### Authentication System
 
-All mutations require a [JWT token](https://jwt.io/) to determine which user is trying to perform the action. To acquire this token you need to call the `auth` mutation. See [how to generate the token](https://github.com/httpiago/graphql-server-with-typescript/blob/4138f6ef17ded0709a89302129e3e81faa5fa59f/src/resolvers/user.ts#L36) and [how to verify if there is an authenticated user in the request](https://github.com/httpiago/graphql-server-with-typescript/blob/4138f6ef17ded0709a89302129e3e81faa5fa59f/src/resolvers/user.ts#L61).
+All mutations require a [JWT token](https://jwt.io/) to determine which user is trying to perform the action. To acquire this token you need to call the `auth` mutation. See [how to generate the token](src/resolvers/user.ts#L36) and [how to verify if there is an authenticated user in the request](src/resolvers/user.ts#L61).
 
 #### Token access permissions
 
-It's possible define which places a token is allowed access and prevent all generated tokens from having access to everything in the api. See [how to define token scope](https://github.com/httpiago/graphql-server-with-typescript/blob/4138f6ef17ded0709a89302129e3e81faa5fa59f/src/common/functions.ts#L45) and [how to check if they have access](https://github.com/httpiago/graphql-server-with-typescript/blob/4138f6ef17ded0709a89302129e3e81faa5fa59f/src/resolvers/user.ts#L81).
+It's possible define which places a token is allowed access and prevent all generated tokens from having access to everything in the api. See [how to define token scope](src/common/functions.ts#L45) and [how to check if they have access](src/resolvers/user.ts#L81).
 
 #### Only allow access to certain types of users
 
-Another good practice is to determine what type of user has access to a certain part of server, for example, only a moderator can approving posts and only an administrator can banning users. [This file](https://github.com/httpiago/graphql-server-with-typescript/blob/master/src/common/permissions.ts) contains all available checks and [here is an example usage](https://github.com/httpiago/graphql-server-with-typescript/blob/4138f6ef17ded0709a89302129e3e81faa5fa59f/src/resolvers/tweet.ts#L94).
+Another good practice is to determine what type of user has access to a certain part of server, for example, only a moderator can approving posts and only an administrator can banning users. [This file](src/common/permissions.ts) contains all available checks and [here is an example usage](src/resolvers/tweet.ts#L94).
 
 ## Pagination
 
@@ -104,7 +104,7 @@ query GetLatestTweets {
 
 The package [graphql-scalars](https://github.com/Urigo/graphql-scalars) has been installed to provides some custom [scalars](https://graphql.org/learn/schema/#scalar-types) to make explicit what the field is about and also validate the inputs.
 
-To add a new scalar, just set it in [Root.graphql](src/types/Root.graphql):
+To add a new scalar, just set it in [Root.graphql](src/schemas/Root.graphql):
 
 ```diff
  scalar DateTime
