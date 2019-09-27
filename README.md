@@ -2,7 +2,7 @@
 
 A simple [GraphQL](https://graphql.org) server using [NodeJS](https://nodejs.org) and [TypeScript](https://www.typescriptlang.org).
 
-[![Online playground](https://img.shields.io/badge/Online-Playground-E00097.svg)](https://graphql-server-with-typescript.httpiago.now.sh/graphql) [![Known Vulnerabilities](https://snyk.io/test/github/httpiago/graphql-server-with-typescript/badge.svg)](https://snyk.io/test/github/httpiago/graphql-server-with-typescript) 
+[![Online playground](https://img.shields.io/badge/Online-Playground-E00097.svg)](https://graphql-server-with-typescript.httpiago.now.sh/graphql) [![Known Vulnerabilities](https://snyk.io/test/github/iagobruno/graphql-server-with-typescript/badge.svg)](https://snyk.io/test/github/iagobruno/graphql-server-with-typescript) 
 
 ## About
 
@@ -10,14 +10,14 @@ Currently, in 2019, to create a GraphQL API it's necessary to write a [schema](h
 
 ## Solutions
 
-Some time ago, I [tried to create a server](https://github.com/httpiago/graphql-and-typescript-legacy) using a package called "[type-graphql](https://github.com/19majkel94/type-graphql)" which aims to automate the creation of the schema based on code writed using [decorators](https://www.typescriptlang.org/docs/handbook/decorators.html). I reached my goal and I was pleased with the result, but now I found some problems looking at the code: decorators are not a standard yet, the code gets more verbose and difficult for other developers to maintain and the package in question still needs to be improved.
+Some time ago, I [tried to create a server](https://github.com/iagobruno/graphql-and-typescript-legacy) using a package called "[type-graphql](https://github.com/19majkel94/type-graphql)" which aims to automate the creation of the schema based on code writed using [decorators](https://www.typescriptlang.org/docs/handbook/decorators.html). I reached my goal and I was pleased with the result, but now I found some problems looking at the code: decorators are not a standard yet, the code gets more verbose and difficult for other developers to maintain and the package in question still needs to be improved.
 
 Anyway, with this project I want to try the reverse approach: automate the creation of code typings based on GraphQL schema and this time I will use another package called "[graphql-codegen](https://github.com/dotansimha/graphql-code-generator)".
 
 ## Installation
 
 ```bash
-git clone https://github.com/httpiago/graphql-server-with-typescript.git
+git clone https://github.com/iagobruno/graphql-server-with-typescript.git
 cd graphql-server-with-typescript
 yarn install
 ```

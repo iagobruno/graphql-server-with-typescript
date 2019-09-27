@@ -1,7 +1,7 @@
 {
   "name": "graphql-server-with-typescript",
   "license": "MIT",
-  "repository": "https://github.com/httpiago/graphql-server-with-typescript.git",
+  "repository": "https://github.com/iagobruno/graphql-server-with-typescript.git",
   "author": "Iago Bruno <httpiago@gmail.com>",
   "main": "src/index.ts",
   "scripts": {
