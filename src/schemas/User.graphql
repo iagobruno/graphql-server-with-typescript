@@ -47,6 +47,11 @@ type DeleteMeResponse implements MutationResponse {
 }
 
 extend type Query {
+  """Create a new token for the user. It Creates a new user if no user with this name is found."""
+  auth(
+    """The name of the user."""
+    username: String!
+  ): JWTToken! @cost(complexity: 50)
   """The currently authenticated user."""
   me: User @cost(complexity: 5)
   """Get a specific user by id."""
@@ -54,11 +59,6 @@ extend type Query {
 }
 
 extend type Mutation {
-  """Create a new token for the user. It Creates a new user if no user with this name is found."""
-  auth(
-    """The name of the user."""
-    username: String!
-  ): JWTToken! @cost(complexity: 50)
   """Update the infos of currently authenticated user."""
   updateMe(input: UpdateMeInput!): UpdateMeResponse @cost(complexity: 10)
   """Delete the currently authenticated user."""

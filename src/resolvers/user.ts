@@ -1,5 +1,5 @@
 import { GraphQLResolvers, GraphQLUser, GraphQLUserRole } from './graphql-resolvers-types'
-import { checkIsAuthenticated, checkJWTScopes, restrictToAdmins } from '../common/permissions'
+import { checkIsAuthenticated, checkIfTokenHasPermission, restrictToAdmins } from '../common/permissions'
 import { getLoggedUser, createJWT, defaultResponseShape } from '../common/functions'
 import { pubsub, APIEvents } from '../common/utils'
 import { withFilter } from 'apollo-server'
@@ -19,21 +19,20 @@ const userResolvers: GraphQLResolvers = {
   },
 
   Query: {
-    async me(_, {}, context) {
+    async me (_, { }, context) {
       await checkIsAuthenticated(context)
-      await checkJWTScopes(context, ['users:me'])
+      await checkIfTokenHasPermission(context, 'read:users')
       const currentUser = await getLoggedUser(context)
 
       return users.find(users => (
         users.id === currentUser!.id
-      )) as GraphQLUser;
+      )) as GraphQLUser
     },
-    async user(_, { id }) {
-      return users.find(user => user.id === id) as GraphQLUser;
+    async user (_, { id }) {
+      return users.find(user => user.id === id) as GraphQLUser
     },
-  },
-  Mutation: {
-    async auth(_, args) {
+
+    async auth (_, args) {
       const username = args.username.toLowerCase()
       let user = users.find(user => user.username === username)
 
@@ -54,14 +53,15 @@ const userResolvers: GraphQLResolvers = {
       return {
         token: `Bearer ${jwt.token}`,
         expiresIn: jwt.expiresIn,
-      };
+      }
     },
-
-    async updateMe(_, { input }, context) {
+  },
+  Mutation: {
+    async updateMe (_, { input }, context) {
       await checkIsAuthenticated(context)
-      await checkJWTScopes(context, ['users:updateme'])
+      await checkIfTokenHasPermission(context, 'write:users')
       const currentUser = await getLoggedUser(context)
-      
+
       // Validate username
       if (input.username) {
         if (input.username === 'null' || input.username === 'undefined') {
@@ -76,7 +76,7 @@ const userResolvers: GraphQLResolvers = {
           return defaultResponseShape({
             success: false,
             message: 'Username already taken! Try another',
-          });
+          })
         }
       }
 
@@ -92,11 +92,11 @@ const userResolvers: GraphQLResolvers = {
         success: true,
         message: 'User updated successfully!',
         node: updatedInfos as GraphQLUser
-      });
+      })
     },
-    async deleteMe(_, {}, context) {
+    async deleteMe (_, { }, context) {
       await checkIsAuthenticated(context)
-      await checkJWTScopes(context, ['users:deleteme'])
+      await checkIfTokenHasPermission(context, 'write:users')
       const currentUser = await getLoggedUser(context)
 
       const userIndex = users.findIndex(user => user.id === currentUser.id)
@@ -106,7 +106,7 @@ const userResolvers: GraphQLResolvers = {
       return defaultResponseShape({
         success: true,
         message: 'User deleted successfully!',
-      });
+      })
     },
   },
   Subscription: {
@@ -116,11 +116,11 @@ const userResolvers: GraphQLResolvers = {
         async (payload, variables, context) => {
           console.log('subscription context', context)
           await restrictToAdmins(context)
-          return true;
+          return true
         }
       )
     },
   },
-};
+}
 
 export default userResolvers

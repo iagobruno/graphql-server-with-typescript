@@ -1,6 +1,6 @@
 import { AuthenticationError } from 'apollo-server'
 import { addHours, getTime, differenceInHours } from 'date-fns'
-import { ScopesArray, checkIsAuthenticated } from './permissions'
+import { checkIsAuthenticated, AvailableScopes } from './permissions'
 import { GraphQLPageInfo, GraphQLNode, GraphQLMutationResponse } from '../resolvers/graphql-resolvers-types'
 import jwt from 'jwt-simple'
 import { isJWT } from 'validator'
@@ -21,7 +21,7 @@ export type JWTPayload = {
   /** Id do usuário registrado no token. */
   subject: string,
   /** List of scopes this token has access to. */
-  scopes: ScopesArray,
+  scopes: Array<keyof typeof AvailableScopes>,
   /** JavaScript date timestamp. */
   issuedAt: number,
   /** JavaScript date timestamp. */
@@ -38,11 +38,11 @@ export type JWTPayload = {
  * @param subject Id of the user who generated the token.
  * @param issuer Address of the route that generated the token.
  */
-export async function createJWT(subject: string, issuer?: string) {
+export async function createJWT (subject: string, issuer?: string) {
   const expiresIn = addHours(Date.now(), maxJWTValidityHours)
   const payload: JWTPayload = {
     subject,
-    scopes: ['tweets', 'users'],
+    scopes: ['read:tweets', 'read:users', 'write:tweets', 'write:users'],
     issuedAt: Date.now(),
     expiresIn: getTime(expiresIn),
     issuer,
@@ -51,7 +51,7 @@ export async function createJWT(subject: string, issuer?: string) {
   return {
     token: jwt.encode(payload, JWT_SECRET),
     expiresIn
-  };
+  }
 }
 
 /**
@@ -62,12 +62,12 @@ export async function createJWT(subject: string, issuer?: string) {
  * @throws Throws an error if a problem occurs while validating the token.
  * @returns Returns the payload of token if all goes well or returns null if no token is found.
  */
-export async function verifyJWT(authorizationToken: string, isRequired = true) {
+export async function verifyJWT (authorizationToken: string, isRequired = true) {
   // Check if there is a token in the request
   if (!authorizationToken || authorizationToken.trim() === '') {
     // Allow access if authentication is optional, otherwise block request
-    if (isRequired === false) return null;
-    else throw new AuthenticationError('Token jwt not found.');
+    if (isRequired === false) return null
+    else throw new AuthenticationError('Token jwt not found.')
   }
 
   // Verify if token is well formatted ("Bearer 1234.5678.91011")
@@ -79,7 +79,7 @@ export async function verifyJWT(authorizationToken: string, isRequired = true) {
     token.trim() === '' ||
     !isJWT(token)
   ) {
-    throw new AuthenticationError('Jwt token is in an invalid format.');
+    throw new AuthenticationError('Jwt token is in an invalid format.')
   }
 
   // Attempt to validate received token
@@ -87,18 +87,18 @@ export async function verifyJWT(authorizationToken: string, isRequired = true) {
   try {
     payload = jwt.decode(token, JWT_SECRET)
   }
-  catch(err) {
+  catch (err) {
     // console.log('jwt.decode error:', err)
-    throw new AuthenticationError('Unable to validate received jwt token.');
+    throw new AuthenticationError('Unable to validate received jwt token.')
   }
 
   // Check if the token has expired
   if (differenceInHours(Date.now(), payload.issuedAt) > maxJWTValidityHours) {
-    throw new AuthenticationError('Token jwt has expired.');
+    throw new AuthenticationError('Token jwt has expired.')
   }
 
   // Allow access!
-  return payload;
+  return payload
 }
 
 
@@ -114,14 +114,14 @@ export async function verifyJWT(authorizationToken: string, isRequired = true) {
  *   ...
  * }
  */
-export async function getLoggedUser(context: Context) {
+export async function getLoggedUser (context: Context) {
   await checkIsAuthenticated(context)
 
-  return context.user!;
+  return context.user!
 }
 
-export function findUserById(id: string) {
-  return users.find(user => user.id === id);
+export function findUserById (id: string) {
+  return users.find(user => user.id === id)
 }
 
 type PaginatedResponseArgs<Node> = {
@@ -134,11 +134,11 @@ type PaginatedResponseArgs<Node> = {
 /**
  * @returns An object with the default shape of GraphQL paginations.
  */
-export function defaultConnectionShape<NodeType extends GraphQLNode>(
+export function defaultConnectionShape<NodeType extends GraphQLNode> (
   { allNodes, nodes, firstArg, startIndex }: PaginatedResponseArgs<NodeType>
 ) {
   const firstItem = nodes[0]
-  const lastItem = nodes[nodes.length-1]
+  const lastItem = nodes[nodes.length - 1]
   const hasAtLeast1Item = (nodes.length >= 1)
   const pageInfo: GraphQLPageInfo = {
     size: Math.min(firstArg, nodes.length),
@@ -152,7 +152,7 @@ export function defaultConnectionShape<NodeType extends GraphQLNode>(
     nodes,
     pageInfo,
     totalCount: allNodes.length
-  };
+  }
 }
 
 interface ResponseShape extends GraphQLMutationResponse {
@@ -163,24 +163,24 @@ interface ResponseShape extends GraphQLMutationResponse {
 /**
  * Force resolver to return a response with a default format to the client.
  */
-export function defaultResponseShape<R extends ResponseShape>(response: R): R {
-  return response;
+export function defaultResponseShape<R extends ResponseShape> (response: R): R {
+  return response
 }
 
 /**
  * Encode a string to base64 (using the Node built-in Buffer).
  * Stolen from http://stackoverflow.com/a/38237610/2115623
  */
-export function encode(text: string | number) {
-  return Buffer.from(String(text)).toString('base64');
+export function encode (text: string | number) {
+  return Buffer.from(String(text)).toString('base64')
 }
 
-type Base64String = string;
+type Base64String = string
 
 /**
  * Decode a base64 string (using the Node built-in Buffer).
  * Stolen from http://stackoverflow.com/a/38237610/2115623
  */
-export function decode(encodedText: Base64String) {
-  return Buffer.from(encodedText, 'base64').toString('ascii');
+export function decode (encodedText: Base64String) {
+  return Buffer.from(encodedText, 'base64').toString('ascii')
 }

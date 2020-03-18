@@ -5,52 +5,32 @@ import { Context } from './utils'
  * List of available scopes for use at the time of creating JWT tokens
  * and for resolvers to verify if the token has access permission.
  */
-export enum Scopes {
-  /** "tweets" scope inherits all tweets privileges: "create", "delete", ... */
-  'tweets',
-  'tweets:create',
-  'tweets:delete',
-  /** "users" scope inherits all users privileges: "me", "updateme", "deleteme", ... */
-  'users',
-  'users:me',
-  'users:updateme',
-  'users:deleteme',
+export enum AvailableScopes {
+  'read:users',
+  'write:users',
+  'read:tweets',
+  'write:tweets',
 }
-export type ScopesArray = Array<keyof typeof Scopes>
 
 /**
- * Check if the JWT token received in the request has the necessary privileges to access this feature.
- * @param scopesToCheck List of scopes to check.
- * @throws Throws an error if the token does not contain some of the required scopes received in "scopesToCheck".
+ * Check if JWT token received in the request has the necessary privileges to access this feature.
+ * @throws If token does not contain the required scope.
  * @returns Returns true if the test passes.
  *
  * @example
  * async resolver(_, args, context) {
   *   await checkIsAuthenticated(context)
-  *   await checkJWTScopes(context, ['users:deleteme'])
+  *   await checkIfTokenHasPermission(context, 'write:users')
   *   ...
   * }
  */
-export async function checkJWTScopes(context: Context, scopesToCheck: ScopesArray) {
-  if (typeof context.jwtPayload === 'undefined') {
-    throw new ForbiddenError('No jwt token was found');
-  }
-  const scopesInJWT = context.jwtPayload.scopes
+export async function checkIfTokenHasPermission (context: Context, requiredScope: keyof typeof AvailableScopes) {
+  const tokenScopes = context.jwtPayload!.scopes
+  const hasPermission = tokenScopes.some(scope => scope === requiredScope)
 
-  scopesToCheck.forEach(requiredScope => {
-    /** The first part before the ":" */
-    const schemaOfRequiredScope = requiredScope.split(':')[0] as any
+  if (!hasPermission) throw new ForbiddenError('The received token is not allowed to access this feature.')
 
-    if (
-      !scopesInJWT.includes(requiredScope) &&
-      // Also check if the token has access to all scope schema methods
-      !scopesInJWT.includes(schemaOfRequiredScope)
-    ) {
-      throw new ForbiddenError('The received token is not allowed to access this feature.');
-    }
-  })
-
-  return true;
+  return true
 }
 
 /**
@@ -64,12 +44,12 @@ export async function checkJWTScopes(context: Context, scopesToCheck: ScopesArra
   *   ...
   * }
  */
-export async function checkIsAuthenticated(context: Context) {
+export async function checkIsAuthenticated (context: Context) {
   if (typeof context.user === 'undefined') {
-    throw new AuthenticationError('You must be logged in');
+    throw new AuthenticationError('You must be logged in')
   }
 
-  return true;
+  return true
 }
 
 /**
@@ -84,12 +64,12 @@ export async function checkIsAuthenticated(context: Context) {
  *   ...
  * }
  */
-export async function restrictToAdmins(context: Context) {
+export async function restrictToAdmins (context: Context) {
   if (typeof context.user === 'undefined' || context.user.role !== 'ADMIN') {
-    throw new ForbiddenError('You do not have permission to access this feature.');
+    throw new ForbiddenError('You do not have permission to access this feature.')
   }
 
-  return true;
+  return true
 }
 
 /**
@@ -107,10 +87,10 @@ export async function restrictToAdmins(context: Context) {
  *   ...
  * }
  */
-export async function restrictToOwner(context: Context, ownerId: string) {
+export async function restrictToOwner (context: Context, ownerId: string) {
   if (typeof context.user === 'undefined' || context.user.id !== ownerId) {
-    throw new ForbiddenError('You do not have permission to access this feature or perform this action.');
+    throw new ForbiddenError('You do not have permission to access this feature or perform this action.')
   }
 
-  return true;
+  return true
 }

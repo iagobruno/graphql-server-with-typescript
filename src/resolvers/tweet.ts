@@ -1,5 +1,5 @@
 import { GraphQLResolvers, GraphQLTweet } from './graphql-resolvers-types'
-import { checkIsAuthenticated, checkJWTScopes, restrictToOwner } from '../common/permissions'
+import { checkIsAuthenticated, checkIfTokenHasPermission, restrictToOwner } from '../common/permissions'
 import { encode, decode, defaultConnectionShape, getLoggedUser, defaultResponseShape } from '../common/functions'
 import { pubsub, APIEvents } from '../common/utils'
 import userResolvers from './user'
@@ -22,7 +22,7 @@ const tweetResolvers: GraphQLResolvers = {
   },
 
   Query: {
-    tweets(_, { first, after, ofUser }) {
+    tweets (_, { first, after, ofUser }) {
       // Validate arguments
       first = Math.max(0, Math.min(50, first))
 
@@ -52,16 +52,16 @@ const tweetResolvers: GraphQLResolvers = {
         nodes,
         firstArg: first,
         startIndex
-      }) as any;
+      }) as any
     },
-    tweet(_, { id }) {
+    tweet (_, { id }) {
       return tweets.find(tweet => tweet.id === id) as GraphQLTweet
     },
   },
   Mutation: {
-    async createTweet(_, { input }, context) {
+    async createTweet (_, { input }, context) {
       await checkIsAuthenticated(context)
-      await checkJWTScopes(context, ['tweets:create'])
+      await checkIfTokenHasPermission(context, 'write:tweets')
       const currentUser = await getLoggedUser(context)
 
       const newTweet: Omit<GraphQLTweet, 'url' | 'author'> = {
@@ -78,18 +78,18 @@ const tweetResolvers: GraphQLResolvers = {
         success: true,
         message: 'Successfully created tweet!',
         node: newTweet as GraphQLTweet,
-      });
+      })
     },
-    async deleteTweet(_, { id }, context) {
+    async deleteTweet (_, { id }, context) {
       await checkIsAuthenticated(context)
-      await checkJWTScopes(context, ['tweets:delete'])
+      await checkIfTokenHasPermission(context, 'write:tweets')
 
       const tweetIndex = tweets.findIndex(tweet => tweet.id === id)
       if (tweetIndex === -1) {
         return defaultResponseShape({
           success: false,
           message: 'Tweet not found',
-        });
+        })
       }
       await restrictToOwner(context, tweets[tweetIndex].authorId)
       // Delete tweet
@@ -98,7 +98,7 @@ const tweetResolvers: GraphQLResolvers = {
       return defaultResponseShape({
         success: true,
         message: 'Successfully deleted tweet!',
-      });
+      })
     },
   },
   Subscription: {
